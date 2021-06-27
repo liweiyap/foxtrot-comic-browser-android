@@ -10,7 +10,11 @@ class TestViewModel(private val broker: TestConnectionBroker): ViewModel() {
         val result = try {
             broker.makeConnectionRequest()
         } catch (e: Exception) {
-            TestResult.Error(Exception("Connection request failed"))
+            if (e.message == null) {
+                TestResult.Error(Exception("Connection request failed"))
+            } else {
+                TestResult.Error(Exception(e.message))
+            }
         }
         when (result) {
             is TestResult.Success<String> -> observer.update(result.component1())
