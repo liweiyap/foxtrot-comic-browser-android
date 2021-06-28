@@ -8,8 +8,6 @@ import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
 
 class TestConnectionBroker {
-    private val mHomeUrlString: String = "https://foxtrot.com/"
-    private lateinit var mLatestStripLink: String
 
     suspend fun makeConnectionRequest(): TestResult<String> {
         return withContext(Dispatchers.IO) {
@@ -53,4 +51,6 @@ class TestConnectionBroker {
         return TestResult.Success(document.toString())
     }
 
+    private val mHomeUrlString: String = "https://foxtrot.com/"
+    private var mLatestStripLink: String by initOnce()
 }
