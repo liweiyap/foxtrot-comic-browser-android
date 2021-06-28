@@ -1,5 +1,6 @@
 package com.liweiyap.foxtrot
 
+import org.junit.Assert.assertEquals
 import org.junit.Test
 
 /**
@@ -9,22 +10,43 @@ import org.junit.Test
  */
 class InitOncePropertyTest {
     @Test
-    fun readPrematureExpectedFailure() {
-        val data = property  // Value is not already initialized, so, as expected, exception is thrown
+    fun run() {
+        assertEquals(readPrematureExpectedFailure(), false)
+        assertEquals(writeTwiceExpectedFailure(), false)
+        assertEquals(writeAndReadExpectedSuccess(), true)
     }
 
-    @Test
-    fun writeTwiceExpectedFailure() {
-        property = "Test1"
-        property = "Test2"  // Value is already initialized, so, as expected, exception is thrown
+    fun readPrematureExpectedFailure(): Boolean {
+        try {
+            val data = property0  // Value is not already initialized, so, as expected, exception is thrown
+        } catch (e: Exception) {
+            return false
+        }
+        return true
     }
 
-    @Test
-    fun writeAndReadExpectedSuccess() {
-        property = "Test"
-        val data1 = property
-        val data2 = property  // As expected, no exception is thrown
+    fun writeTwiceExpectedFailure(): Boolean {
+        try {
+            property1 = "Test1"
+            property1 = "Test2"  // Value is already initialized, so, as expected, exception is thrown
+        } catch (e: Exception) {
+            return false
+        }
+        return true
     }
 
-    var property: String by initOnce()
+    fun writeAndReadExpectedSuccess(): Boolean {
+        try {
+            property2 = "Test"
+            val data1 = property2
+            val data2 = property2  // As expected, no exception is thrown
+        } catch (e: Exception) {
+            return false
+        }
+        return true
+    }
+
+    private var property0: String by initOnce()
+    private var property1: String by initOnce()
+    private var property2: String by initOnce()
 }
