@@ -1,4 +1,4 @@
-package com.liweiyap.foxtrot
+package com.liweiyap.foxtrot.util
 
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.properties.ReadWriteProperty

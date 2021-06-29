@@ -1,5 +1,8 @@
-package com.liweiyap.foxtrot
+package com.liweiyap.foxtrot.util.scraper
 
+import com.liweiyap.foxtrot.util.StripDataModel
+import com.liweiyap.foxtrot.util.StripDate
+import com.liweiyap.foxtrot.util.initOnce
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
@@ -8,16 +11,16 @@ import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
 import java.util.*
 
-class TestConnectionBroker {
+class WebHomePageScraper {
 
-    suspend fun makeConnectionRequest(): TestResult<String> {
+    suspend fun scrapLatestStripThreadSafe(): ScraperResult<StripDataModel> {
         return withContext(Dispatchers.IO) {
             return@withContext scrapeLatestStrip()
         }
     }
 
-    private fun scrapeLatestStrip(): TestResult<String> {
-        val result: String
+    private fun scrapeLatestStrip(): ScraperResult<StripDataModel> {
+        val strip: StripDataModel
 
         try {
             val homePage: Document = Jsoup.connect(mHomeUrlString).get()
@@ -28,21 +31,20 @@ class TestConnectionBroker {
             val latestStripElement: Element = homePageStripElements.first()
             val latestStripEntry: Elements = latestStripElement.getElementsByTag("a")
             mLatestStripLink = latestStripEntry.attr("href")
-            val latestStripLinkScrapeResult: TestResult<String> = scrapeStrip(mLatestStripLink)
-            if (latestStripLinkScrapeResult is TestResult.Success<String>) {
-                val latestStripLinkHtml: String = latestStripLinkScrapeResult.component1()
-                result = latestStripLinkHtml
+            val latestStripLinkScrapeResult = scrapeStrip(mLatestStripLink)
+            if (latestStripLinkScrapeResult is ScraperResult.Success<StripDataModel>) {
+                strip = latestStripLinkScrapeResult.component1()
             } else {
                 throw Exception("TestConnectionBroker::scrapeLatestStrip(): error scraping link to latest strip.")
             }
         } catch (e: Exception) {
-            return TestResult.Error(e)
+            return ScraperResult.Error(e)
         }
 
-        return TestResult.Success(result)
+        return ScraperResult.Success(strip)
     }
 
-    private fun scrapeStrip(urlString: String): TestResult<String> {
+    private fun scrapeStrip(urlString: String): ScraperResult<StripDataModel> {
         val stripData: StripDataModel
 
         try {
@@ -55,12 +57,19 @@ class TestConnectionBroker {
             val stripImageMetadata: Elements = stripEntry.select(".entry-content").first().getElementsByTag("img")
             val stripImageSourceUrl: String = stripImageMetadata.attr("src")
             val stripImageAltText: String = stripImageMetadata.attr("alt")
-            stripData = StripDataModel(stripTitle, stripDate, stripImageSourceUrl, stripImageAltText)
+            val stripTagsRaw: Elements = stripEntry.select(".entry-tags")
+            val stripTags: ArrayList<String> = arrayListOf()
+            if (stripTagsRaw.size >= 1) {
+                for (rawTag in stripTagsRaw.first().getElementsByTag("a")) {
+                    stripTags.add(rawTag.text())
+                }
+            }
+            stripData = StripDataModel(stripTitle, stripDate, stripImageSourceUrl, stripImageAltText, stripTags)
         } catch (e: Exception) {
-            return TestResult.Error(e)
+            return ScraperResult.Error(e)
         }
 
-        return TestResult.Success(stripData.imageAltText)
+        return ScraperResult.Success(stripData)
     }
 
     private val mHomeUrlString: String = "https://foxtrot.com/"

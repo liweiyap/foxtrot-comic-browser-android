@@ -3,6 +3,9 @@ package com.liweiyap.foxtrot
 import android.os.Bundle
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.liweiyap.foxtrot.util.scraper.ScraperObserver
+import com.liweiyap.foxtrot.util.scraper.ScraperViewModel
+import com.liweiyap.foxtrot.util.scraper.WebHomePageScraper
 
 class MainActivity : AppCompatActivity() {
 
@@ -10,7 +13,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        vm.makeConnectionRequest(object: Observer {
+        vm.scrapeLatestStrip(object: ScraperObserver {
             override fun update(str: String) {
                 val tv: TextView = findViewById(R.id.hello_world)
                 tv.text = str
@@ -18,5 +21,5 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    private val vm: TestViewModel = TestViewModel(TestConnectionBroker())
+    private val vm: ScraperViewModel = ScraperViewModel(WebHomePageScraper())
 }

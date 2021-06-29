@@ -1,9 +1,10 @@
-package com.liweiyap.foxtrot
+package com.liweiyap.foxtrot.util.scraper
 
 import android.icu.text.SimpleDateFormat
 import android.os.Build
 import android.text.format.DateFormat
 import androidx.annotation.RequiresApi
+import com.liweiyap.foxtrot.util.StripDate
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.*

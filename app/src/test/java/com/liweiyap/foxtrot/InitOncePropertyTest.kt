@@ -1,5 +1,6 @@
 package com.liweiyap.foxtrot
 
+import com.liweiyap.foxtrot.util.initOnce
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
