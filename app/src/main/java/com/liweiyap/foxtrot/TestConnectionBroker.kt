@@ -51,6 +51,7 @@ class TestConnectionBroker {
             val stripTitle: String = stripEntry.select(".entry-newtitle").text()
             val stripDateRaw: String = stripEntry.select(".entry-summary").text()
             val stripDate: StripDate = DateFormatter.formatDate(stripDateRaw)
+                ?: throw Exception("TestConnectionBroker::scrapeStrip(): error retrieving date of strip.")
             val stripImageMetadata: Elements = stripEntry.select(".entry-content").first().getElementsByTag("img")
             val stripImageSourceUrl: String = stripImageMetadata.attr("src")
             val stripImageAltText: String = stripImageMetadata.attr("alt")

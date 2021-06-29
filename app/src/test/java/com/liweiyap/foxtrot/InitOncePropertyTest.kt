@@ -16,7 +16,7 @@ class InitOncePropertyTest {
         assertEquals(writeAndReadExpectedSuccess(), true)
     }
 
-    fun readPrematureExpectedFailure(): Boolean {
+    private fun readPrematureExpectedFailure(): Boolean {
         try {
             val data = property0  // Value is not already initialized, so, as expected, exception is thrown
         } catch (e: Exception) {
@@ -25,7 +25,7 @@ class InitOncePropertyTest {
         return true
     }
 
-    fun writeTwiceExpectedFailure(): Boolean {
+    private fun writeTwiceExpectedFailure(): Boolean {
         try {
             property1 = "Test1"
             property1 = "Test2"  // Value is already initialized, so, as expected, exception is thrown
@@ -35,7 +35,7 @@ class InitOncePropertyTest {
         return true
     }
 
-    fun writeAndReadExpectedSuccess(): Boolean {
+    private fun writeAndReadExpectedSuccess(): Boolean {
         try {
             property2 = "Test"
             val data1 = property2
