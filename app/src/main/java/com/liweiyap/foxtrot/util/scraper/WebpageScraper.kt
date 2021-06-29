@@ -11,11 +11,17 @@ import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
 import java.util.*
 
-class WebHomePageScraper {
+class WebpageScraper {
 
-    suspend fun scrapLatestStripThreadSafe(): ScraperResult<StripDataModel> {
+    suspend fun scrapeLatestStripMainSafe(): ScraperResult<StripDataModel> {
         return withContext(Dispatchers.IO) {
             return@withContext scrapeLatestStrip()
+        }
+    }
+
+    suspend fun scrapePrevStripMainSafe(currentStripUrlString: String): ScraperResult<StripDataModel> {
+        return withContext(Dispatchers.IO) {
+            return@withContext scrapePrevStrip(currentStripUrlString)
         }
     }
 
@@ -26,16 +32,41 @@ class WebHomePageScraper {
             val homePage: Document = Jsoup.connect(mHomeUrlString).get()
             val homePageStripElements: Elements = homePage.getElementsByTag("article")
             if (homePageStripElements.size < 1) {  // size should be equal to 6
-                throw Exception("TestConnectionBroker::scrapeLatestStrip(): no element named 'article' on home page.")
+                throw Exception("WebPageScraper::scrapeLatestStrip(): no element named 'article' on home page.")
             }
             val latestStripElement: Element = homePageStripElements.first()
             val latestStripEntry: Elements = latestStripElement.getElementsByTag("a")
-            mLatestStripLink = latestStripEntry.attr("href")
-            val latestStripLinkScrapeResult = scrapeStrip(mLatestStripLink)
+            mLatestStripUrlString = latestStripEntry.attr("href")  // if attr does not exist, `.attr()` returns an empty String
+            val latestStripLinkScrapeResult = scrapeStrip(mLatestStripUrlString)
             if (latestStripLinkScrapeResult is ScraperResult.Success<StripDataModel>) {
                 strip = latestStripLinkScrapeResult.component1()
             } else {
-                throw Exception("TestConnectionBroker::scrapeLatestStrip(): error scraping link to latest strip.")
+                throw Exception("WebPageScraper::scrapeLatestStrip(): error scraping link to latest strip.")
+            }
+        } catch (e: Exception) {
+            return ScraperResult.Error(e)
+        }
+
+        return ScraperResult.Success(strip)
+    }
+
+    private fun scrapePrevStrip(currentStripUrlString: String): ScraperResult<StripDataModel> {
+        val strip: StripDataModel
+
+        try {
+            val currentStripPage: Document = Jsoup.connect(currentStripUrlString).get()
+            val currentStripEntry: Elements = currentStripPage.getElementsByClass("entry")
+            val adjacentStripEntries: Elements = currentStripEntry.select(".entry-navarrows").select("[rel=\"prev\"]")
+            if (adjacentStripEntries.size < 1) {
+                throw Exception("WebPageScraper::scrapeLatestStrip(): Strip with URL $currentStripUrlString does not have a previous strip.")
+            }
+            val prevStripEntry: Elements = adjacentStripEntries.first().getElementsByTag("a")
+            val prevStripLink: String = prevStripEntry.attr("href")
+            val prevStripLinkScrapeResult = scrapeStrip(prevStripLink)
+            if (prevStripLinkScrapeResult is ScraperResult.Success<StripDataModel>) {
+                strip = prevStripLinkScrapeResult.component1()
+            } else {
+                throw Exception("WebPageScraper::scrapeLatestStrip(): error scraping link to previous strip.")
             }
         } catch (e: Exception) {
             return ScraperResult.Error(e)
@@ -64,7 +95,7 @@ class WebHomePageScraper {
                     stripTags.add(rawTag.text())
                 }
             }
-            stripData = StripDataModel(stripTitle, stripDate, stripImageSourceUrl, stripImageAltText, stripTags)
+            stripData = StripDataModel(urlString, stripTitle, stripDate, stripImageSourceUrl, stripImageAltText, stripTags)
         } catch (e: Exception) {
             return ScraperResult.Error(e)
         }
@@ -72,6 +103,10 @@ class WebHomePageScraper {
         return ScraperResult.Success(stripData)
     }
 
+    fun getLatestStripUrl(): String {
+        return mLatestStripUrlString
+    }
+
     private val mHomeUrlString: String = "https://foxtrot.com/"
-    private var mLatestStripLink: String by initOnce()
+    private var mLatestStripUrlString: String by initOnce()
 }
