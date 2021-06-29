@@ -25,6 +25,12 @@ class WebpageScraper {
         }
     }
 
+    suspend fun getNumberOfStripsMainSafe(): ScraperResult<Int> {
+        return withContext(Dispatchers.IO) {
+            return@withContext getNumberOfStrips()
+        }
+    }
+
     private fun scrapeLatestStrip(): ScraperResult<StripDataModel> {
         val strip: StripDataModel
 
@@ -32,7 +38,7 @@ class WebpageScraper {
             val homePage: Document = Jsoup.connect(mHomeUrlString).get()
             val homePageStripElements: Elements = homePage.getElementsByTag("article")
             if (homePageStripElements.size < 1) {  // size should be equal to 6
-                throw Exception("WebPageScraper::scrapeLatestStrip(): no element named 'article' on home page.")
+                throw Exception("WebpageScraper::scrapeLatestStrip(): no element named 'article' on home page.")
             }
             val latestStripElement: Element = homePageStripElements.first()
             val latestStripEntry: Elements = latestStripElement.getElementsByTag("a")
@@ -41,7 +47,7 @@ class WebpageScraper {
             if (latestStripLinkScrapeResult is ScraperResult.Success<StripDataModel>) {
                 strip = latestStripLinkScrapeResult.component1()
             } else {
-                throw Exception("WebPageScraper::scrapeLatestStrip(): error scraping link to latest strip.")
+                throw Exception("WebpageScraper::scrapeLatestStrip(): error scraping link to latest strip.")
             }
         } catch (e: Exception) {
             return ScraperResult.Error(e)
@@ -58,7 +64,7 @@ class WebpageScraper {
             val currentStripEntry: Elements = currentStripPage.getElementsByClass("entry")
             val adjacentStripEntries: Elements = currentStripEntry.select(".entry-navarrows").select("[rel=\"prev\"]")
             if (adjacentStripEntries.size < 1) {
-                throw Exception("WebPageScraper::scrapeLatestStrip(): Strip with URL $currentStripUrlString does not have a previous strip.")
+                throw Exception("WebpageScraper::scrapePrevStrip(): Strip with URL $currentStripUrlString does not have a previous strip.")
             }
             val prevStripEntry: Elements = adjacentStripEntries.first().getElementsByTag("a")
             val prevStripLink: String = prevStripEntry.attr("href")
@@ -66,7 +72,7 @@ class WebpageScraper {
             if (prevStripLinkScrapeResult is ScraperResult.Success<StripDataModel>) {
                 strip = prevStripLinkScrapeResult.component1()
             } else {
-                throw Exception("WebPageScraper::scrapeLatestStrip(): error scraping link to previous strip.")
+                throw Exception("WebpageScraper::scrapePrevStrip(): error scraping link to previous strip.")
             }
         } catch (e: Exception) {
             return ScraperResult.Error(e)
@@ -84,7 +90,7 @@ class WebpageScraper {
             val stripTitle: String = stripEntry.select(".entry-newtitle").text()
             val stripDateRaw: String = stripEntry.select(".entry-summary").text()
             val stripDate: StripDate = DateFormatter.formatDate(stripDateRaw)
-                ?: throw Exception("TestConnectionBroker::scrapeStrip(): error retrieving date of strip.")
+                ?: throw Exception("WebpageScraper::scrapeStrip(): error retrieving date of strip.")
             val stripImageMetadata: Elements = stripEntry.select(".entry-content").first().getElementsByTag("img")
             val stripImageSourceUrl: String = stripImageMetadata.attr("src")
             val stripImageAltText: String = stripImageMetadata.attr("alt")
@@ -101,6 +107,31 @@ class WebpageScraper {
         }
 
         return ScraperResult.Success(stripData)
+    }
+
+    private fun getNumberOfStrips(): ScraperResult<Int> {
+        val numberOfStrips: Int
+        val stripsPerPage = 6
+
+        try {
+            val homePage: Document = Jsoup.connect(mHomeUrlString).get()
+            val pageNavigator: Elements = homePage.getElementsByClass("navigation")
+            val pageNumbers: Elements = pageNavigator.select(".page-numbers")
+            val lastPageNumber: Element = pageNumbers[pageNumbers.size - 2]
+            val numberOfPages: Int = Integer.valueOf(lastPageNumber.text())
+            val lastPageAttr: Elements = lastPageNumber.getElementsByTag("a")
+            val lastPageUrl: String = lastPageAttr.attr("href")
+            val lastPage: Document = Jsoup.connect(lastPageUrl).get()
+            val lastPageStripElements: Elements = lastPage.getElementsByTag("article")
+            numberOfStrips = (numberOfPages - 1) * stripsPerPage + lastPageStripElements.size
+            if (numberOfStrips < 0) {
+                throw Exception("WebpageScraper::getNumberOfStrips(): no. of strips cannot be negative.")
+            }
+        } catch (e: Exception) {
+            return ScraperResult.Error(e)
+        }
+
+        return ScraperResult.Success(numberOfStrips)
     }
 
     fun getLatestStripUrl(): String {

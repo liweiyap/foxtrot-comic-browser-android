@@ -23,7 +23,7 @@ class MainActivity : AppCompatActivity() {
 
         val btn: MaterialButton = findViewById(R.id.testButton)
         btn.setOnClickListener {
-            vm.scrapePrevStrips(object : ScraperObserver {
+            vm.getNumberOfStrips(object : ScraperObserver {
                 override fun update(str: String) {
                     val tv: TextView = findViewById(R.id.hello_world)
                     tv.text = str
