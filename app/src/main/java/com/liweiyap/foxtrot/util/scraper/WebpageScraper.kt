@@ -10,24 +10,25 @@ import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
 import java.util.*
+import javax.inject.Inject
 
-class WebpageScraper {
+class WebpageScraper @Inject constructor() {
 
     suspend fun scrapeLatestStripMainSafe(): ScraperResult<StripDataModel> {
         return withContext(Dispatchers.IO) {
-            return@withContext scrapeLatestStrip()
+            scrapeLatestStrip()
         }
     }
 
     suspend fun scrapePrevStripMainSafe(currentStripUrlString: String): ScraperResult<StripDataModel> {
         return withContext(Dispatchers.IO) {
-            return@withContext scrapePrevStrip(currentStripUrlString)
+            scrapePrevStrip(currentStripUrlString)
         }
     }
 
-    suspend fun getNumberOfStripsMainSafe(): ScraperResult<Int> {
+    suspend fun getStripCountMainSafe(): ScraperResult<Int> {
         return withContext(Dispatchers.IO) {
-            return@withContext getNumberOfStrips()
+            getStripCount()
         }
     }
 
@@ -109,7 +110,7 @@ class WebpageScraper {
         return ScraperResult.Success(stripData)
     }
 
-    private fun getNumberOfStrips(): ScraperResult<Int> {
+    private fun getStripCount(): ScraperResult<Int> {
         val numberOfStrips: Int
         val stripsPerPage = 6
 

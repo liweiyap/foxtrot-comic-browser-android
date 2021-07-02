@@ -1,91 +1,38 @@
 package com.liweiyap.foxtrot.util.scraper
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.liweiyap.foxtrot.ScraperRepository
 import com.liweiyap.foxtrot.util.StripDataModel
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class ScraperViewModel(private val scraper: WebpageScraper): ViewModel() {
+@HiltViewModel
+class ScraperViewModel @Inject constructor(private val repo: ScraperRepository): ViewModel() {
 
-    fun scrapeLatestStrip(observer: ScraperObserver) = viewModelScope.launch {
-        val result = try {
-            scraper.scrapeLatestStripMainSafe()
-        } catch (e: Exception) {
-            if (e.message == null) {
-                ScraperResult.Error(Exception("ScraperViewModel::scrapeLatestStrip(): Failed to scrape latest strip."))
-            } else {
-                ScraperResult.Error(Exception(e.message))
-            }
-        }
+    fun scrapeAllStrips() = viewModelScope.launch {
+        _stripDataResult.value = repo.scrapeLatestStripMainSafe()
 
-        when (result) {
-            is ScraperResult.Success<StripDataModel> -> observer.update(result.component1().title)
-            else -> observer.update("Fail")
-        }
+        var tmpStripResult: ScraperResult<StripDataModel> = repo.scrapePrevStripMainSafe(repo.getLatestStripUrl())
 
-//        if (result is ScraperResult.Success<StripDataModel>) {
-//            observer.update(result.component1().title)
-//            scrapePrevStrips(observer)
-//        }
-    }
-
-    fun scrapePrevStrip(observer: ScraperObserver) = viewModelScope.launch {
-        val result = try {
-            scraper.scrapePrevStripMainSafe(scraper.getLatestStripUrl())
-        } catch (e: Exception) {
-            if (e.message == null) {
-                ScraperResult.Error(Exception("ScraperViewModel::scrapePrevStrip(): Failed to scrape previous strip."))
-            } else {
-                ScraperResult.Error(Exception(e.message))
-            }
-        }
-
-        when (result) {
-            is ScraperResult.Success<StripDataModel> -> observer.update(result.component1().title)
-            else -> observer.update("Fail")
+        while (tmpStripResult is ScraperResult.Success<StripDataModel>) {
+            _stripDataResult.value = tmpStripResult
+            tmpStripResult = repo.scrapePrevStripMainSafe(tmpStripResult.component1().url)
         }
     }
 
-    fun scrapePrevStrips(observer: ScraperObserver) = viewModelScope.launch {
-        var result = try {
-            scraper.scrapePrevStripMainSafe(scraper.getLatestStripUrl())
-        } catch (e: Exception) {
-            if (e.message == null) {
-                ScraperResult.Error(Exception("ScraperViewModel::scrapePrevStrip(): Failed to scrape previous strip."))
-            } else {
-                ScraperResult.Error(Exception(e.message))
-            }
-        }
-
-        while (result is ScraperResult.Success<StripDataModel>) {
-            observer.update(result.component1().title)
-            result = try {
-                scraper.scrapePrevStripMainSafe(result.component1().url)
-            } catch (e: Exception) {
-                if (e.message == null) {
-                    ScraperResult.Error(Exception("ScraperViewModel::scrapePrevStrip(): Failed to scrape previous strip."))
-                } else {
-                    ScraperResult.Error(Exception(e.message))
-                }
-            }
-        }
+    fun countStrips() = viewModelScope.launch {
+        _stripCountResult.value = repo.getStripCountMainSafe()
     }
 
-    fun getNumberOfStrips(observer: ScraperObserver) = viewModelScope.launch {
-        val result = try {
-            scraper.getNumberOfStripsMainSafe()
-        } catch (e: Exception) {
-            if (e.message == null) {
-                ScraperResult.Error(Exception("ScraperViewModel::scrapePrevStrip(): Failed to scrape previous strip."))
-            } else {
-                ScraperResult.Error(Exception(e.message))
-            }
-        }
+    private val _stripDataResult = MutableLiveData<ScraperResult<StripDataModel>>()
+    val stripDataResult: LiveData<ScraperResult<StripDataModel>>
+        get() = _stripDataResult
 
-        when (result) {
-            is ScraperResult.Success<Int> -> observer.update(result.component1().toString())
-            else -> observer.update("Fail")
-        }
-    }
-
+    private val _stripCountResult = MutableLiveData<ScraperResult<Int>>()
+    val stripCountResult: LiveData<ScraperResult<Int>>
+        get() = _stripCountResult
 }
