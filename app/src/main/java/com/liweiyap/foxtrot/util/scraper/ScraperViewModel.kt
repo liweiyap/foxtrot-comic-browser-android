@@ -4,7 +4,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.liweiyap.foxtrot.ScraperRepository
 import com.liweiyap.foxtrot.util.StripDataModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -16,7 +15,12 @@ class ScraperViewModel @Inject constructor(private val repo: ScraperRepository):
     fun scrapeAllStrips() = viewModelScope.launch {
         _stripDataResult.value = repo.scrapeLatestStripMainSafe()
 
-        var tmpStripResult: ScraperResult<StripDataModel> = repo.scrapePrevStripMainSafe(repo.getLatestStripUrl())
+        // basically the same as:
+        // `var tmpStripResult: ScraperResult<StripDataModel> = repo.scrapePrevStripMainSafe(repo.getLatestStripUrl())`,
+        // but with null check
+        var tmpStripResult: ScraperResult<StripDataModel> = repo.getLatestStripUrl()?.let {
+            repo.scrapePrevStripMainSafe(it)
+        } ?: return@launch
 
         while (tmpStripResult is ScraperResult.Success<StripDataModel>) {
             _stripDataResult.value = tmpStripResult

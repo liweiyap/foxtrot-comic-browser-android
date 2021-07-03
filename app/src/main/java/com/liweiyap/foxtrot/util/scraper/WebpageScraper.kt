@@ -2,7 +2,6 @@ package com.liweiyap.foxtrot.util.scraper
 
 import com.liweiyap.foxtrot.util.StripDataModel
 import com.liweiyap.foxtrot.util.StripDate
-import com.liweiyap.foxtrot.util.initOnce
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
@@ -36,7 +35,7 @@ class WebpageScraper @Inject constructor() {
         val strip: StripDataModel
 
         try {
-            val homePage: Document = Jsoup.connect(mHomeUrlString).get()
+            val homePage: Document = Jsoup.connect(mHomeUrlString).timeout(mConnectionTimeoutInMilliSecs).get()
             val homePageStripElements: Elements = homePage.getElementsByTag("article")
             if (homePageStripElements.size < 1) {  // size should be equal to 6
                 throw Exception("WebpageScraper::scrapeLatestStrip(): no element named 'article' on home page.")
@@ -61,7 +60,7 @@ class WebpageScraper @Inject constructor() {
         val strip: StripDataModel
 
         try {
-            val currentStripPage: Document = Jsoup.connect(currentStripUrlString).get()
+            val currentStripPage: Document = Jsoup.connect(currentStripUrlString).timeout(mConnectionTimeoutInMilliSecs).get()
             val currentStripEntry: Elements = currentStripPage.getElementsByClass("entry")
             val adjacentStripEntries: Elements = currentStripEntry.select(".entry-navarrows").select("[rel=\"prev\"]")
             if (adjacentStripEntries.size < 1) {
@@ -86,7 +85,7 @@ class WebpageScraper @Inject constructor() {
         val stripData: StripDataModel
 
         try {
-            val stripPage: Document = Jsoup.connect(urlString).get()
+            val stripPage: Document = Jsoup.connect(urlString).timeout(mConnectionTimeoutInMilliSecs).get()
             val stripEntry: Elements = stripPage.getElementsByClass("entry")
             val stripTitle: String = stripEntry.select(".entry-newtitle").text()
             val stripDateRaw: String = stripEntry.select(".entry-summary").text()
@@ -115,14 +114,14 @@ class WebpageScraper @Inject constructor() {
         val stripsPerPage = 6
 
         try {
-            val homePage: Document = Jsoup.connect(mHomeUrlString).get()
+            val homePage: Document = Jsoup.connect(mHomeUrlString).timeout(mConnectionTimeoutInMilliSecs).get()
             val pageNavigator: Elements = homePage.getElementsByClass("navigation")
             val pageNumbers: Elements = pageNavigator.select(".page-numbers")
             val lastPageNumber: Element = pageNumbers[pageNumbers.size - 2]
             val numberOfPages: Int = Integer.valueOf(lastPageNumber.text())
             val lastPageAttr: Elements = lastPageNumber.getElementsByTag("a")
             val lastPageUrl: String = lastPageAttr.attr("href")
-            val lastPage: Document = Jsoup.connect(lastPageUrl).get()
+            val lastPage: Document = Jsoup.connect(lastPageUrl).timeout(mConnectionTimeoutInMilliSecs).get()
             val lastPageStripElements: Elements = lastPage.getElementsByTag("article")
             numberOfStrips = (numberOfPages - 1) * stripsPerPage + lastPageStripElements.size
             if (numberOfStrips < 0) {
@@ -135,10 +134,15 @@ class WebpageScraper @Inject constructor() {
         return ScraperResult.Success(numberOfStrips)
     }
 
-    fun getLatestStripUrl(): String {
+    fun getLatestStripUrl(): String? {
+        if (!this::mLatestStripUrlString.isInitialized) {
+            return null
+        }
         return mLatestStripUrlString
     }
 
     private val mHomeUrlString: String = "https://foxtrot.com/"
-    private var mLatestStripUrlString: String by initOnce()
+    private lateinit var mLatestStripUrlString: String
+
+    private val mConnectionTimeoutInMilliSecs: Int = 5000
 }
