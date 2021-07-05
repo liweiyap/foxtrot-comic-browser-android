@@ -144,5 +144,5 @@ class WebpageScraper @Inject constructor() {
     private val mHomeUrlString: String = "https://foxtrot.com/"
     private lateinit var mLatestStripUrlString: String
 
-    private val mConnectionTimeoutInMilliSecs: Int = 5000
+    private val mConnectionTimeoutInMilliSecs: Int = 15000
 }

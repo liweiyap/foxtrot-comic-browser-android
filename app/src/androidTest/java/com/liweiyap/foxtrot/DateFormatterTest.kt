@@ -20,13 +20,13 @@ class DateFormatterTest {
     private fun testSinceExpectedSuccess(rawDate: String, expectedDay: Int, expectedMonth: Int, expectedYear: Int) {
         val date: StripDate = DateFormatter.formatDateSinceApi26(rawDate)
             ?: throw Exception("DateFormatterTest::testSince(): error retrieving date of strip.")
-        assertDate(date, expectedDay, expectedMonth, expectedYear)
+        assertEquals(date, StripDate(expectedDay, expectedMonth, expectedYear))
     }
 
     private fun testPreExpectedSuccess(rawDate: String, expectedDay: Int, expectedMonth: Int, expectedYear: Int) {
         val date: StripDate = DateFormatter.formatDatePreApi26(rawDate)
             ?: throw Exception("DateFormatterTest::testPre(): error retrieving date of strip.")
-        assertDate(date, expectedDay, expectedMonth, expectedYear)
+        assertEquals(date, StripDate(expectedDay, expectedMonth, expectedYear))
     }
 
     private fun testSinceExpectedFailure(rawDate: String) {
@@ -35,12 +35,6 @@ class DateFormatterTest {
 
     private fun testPreExpectedFailure(rawDate: String) {
         assertNull(DateFormatter.formatDatePreApi26(rawDate))
-    }
-
-    private fun assertDate(date: StripDate, expectedDay: Int, expectedMonth: Int, expectedYear: Int) {
-        assertEquals(date.day, expectedDay)
-        assertEquals(date.month, expectedMonth)
-        assertEquals(date.year, expectedYear)
     }
 
     // https://stackoverflow.com/questions/1038570/how-can-i-convert-an-integer-to-localized-month-name-in-java
