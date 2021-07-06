@@ -9,8 +9,8 @@ class ScraperRepository @Inject constructor(private val scraper: WebpageScraper,
     suspend fun scrapeLatestStripMainSafe(): ScraperResult<StripDataModel> =
         scraper.scrapeLatestStripMainSafe()
 
-    suspend fun scrapePrevStripMainSafe(currentStripUrlString: String): ScraperResult<StripDataModel> =
-        scraper.scrapePrevStripMainSafe(currentStripUrlString)
+    suspend fun scrapeStripMainSafe(urlString: String): ScraperResult<StripDataModel> =
+        scraper.scrapeStripMainSafe(urlString)
 
     suspend fun getStripCountMainSafe(): ScraperResult<Int> =
         scraper.getStripCountMainSafe()

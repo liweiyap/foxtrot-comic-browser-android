@@ -13,18 +13,17 @@ import javax.inject.Inject
 class ScraperViewModel @Inject constructor(private val repo: ScraperRepository): ViewModel() {
 
     fun scrapeAllStrips() = viewModelScope.launch {
-        _stripDataResult.value = repo.scrapeLatestStripMainSafe()
-
-        // basically the same as:
-        // `var tmpStripResult: ScraperResult<StripDataModel> = repo.scrapePrevStripMainSafe(repo.getLatestStripUrl())`,
-        // but with null check
-        var tmpStripResult: ScraperResult<StripDataModel> = repo.getLatestStripUrl()?.let {
-            repo.scrapePrevStripMainSafe(it)
-        } ?: return@launch
+        var tmpStripResult: ScraperResult<StripDataModel> = repo.scrapeLatestStripMainSafe()
 
         while (tmpStripResult is ScraperResult.Success<StripDataModel>) {
             _stripDataResult.value = tmpStripResult
-            tmpStripResult = repo.scrapePrevStripMainSafe(tmpStripResult.component1().url)
+
+            // basically the same as:
+            // `tmpStripResult = repo.scrapeStripMainSafe(tmpStripResult.data.prevStripUrl)`
+            // but with null check
+            tmpStripResult = tmpStripResult.data.prevStripUrl?.let {
+                repo.scrapeStripMainSafe(it)
+            } ?: ScraperResult.Error(Exception())
         }
     }
 

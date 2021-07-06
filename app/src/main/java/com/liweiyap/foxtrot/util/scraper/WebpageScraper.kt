@@ -19,9 +19,9 @@ class WebpageScraper @Inject constructor() {
         }
     }
 
-    suspend fun scrapePrevStripMainSafe(currentStripUrlString: String): ScraperResult<StripDataModel> {
+    suspend fun scrapeStripMainSafe(urlString: String): ScraperResult<StripDataModel> {
         return withContext(Dispatchers.IO) {
-            scrapePrevStrip(currentStripUrlString)
+            scrapeStrip(urlString)
         }
     }
 
@@ -56,44 +56,30 @@ class WebpageScraper @Inject constructor() {
         return ScraperResult.Success(strip)
     }
 
-    private fun scrapePrevStrip(currentStripUrlString: String): ScraperResult<StripDataModel> {
-        val strip: StripDataModel
-
-        try {
-            val currentStripPage: Document = Jsoup.connect(currentStripUrlString).timeout(mConnectionTimeoutInMilliSecs).get()
-            val currentStripEntry: Elements = currentStripPage.getElementsByClass("entry")
-            val adjacentStripEntries: Elements = currentStripEntry.select(".entry-navarrows").select("[rel=\"prev\"]")
-            if (adjacentStripEntries.size < 1) {
-                throw Exception("WebpageScraper::scrapePrevStrip(): Strip with URL $currentStripUrlString does not have a previous strip.")
-            }
-            val prevStripEntry: Elements = adjacentStripEntries.first().getElementsByTag("a")
-            val prevStripLink: String = prevStripEntry.attr("href")
-            val prevStripLinkScrapeResult = scrapeStrip(prevStripLink)
-            if (prevStripLinkScrapeResult is ScraperResult.Success<StripDataModel>) {
-                strip = prevStripLinkScrapeResult.component1()
-            } else {
-                throw Exception("WebpageScraper::scrapePrevStrip(): error scraping link to previous strip.")
-            }
-        } catch (e: Exception) {
-            return ScraperResult.Error(e)
-        }
-
-        return ScraperResult.Success(strip)
-    }
-
     private fun scrapeStrip(urlString: String): ScraperResult<StripDataModel> {
         val stripData: StripDataModel
 
         try {
+            // establish connection
             val stripPage: Document = Jsoup.connect(urlString).timeout(mConnectionTimeoutInMilliSecs).get()
+
+            // title
             val stripEntry: Elements = stripPage.getElementsByClass("entry")
             val stripTitle: String = stripEntry.select(".entry-newtitle").text()
+
+            // date
             val stripDateRaw: String = stripEntry.select(".entry-summary").text()
             val stripDate: StripDate = DateFormatter.formatDate(stripDateRaw)
                 ?: throw Exception("WebpageScraper::scrapeStrip(): error retrieving date of strip from $stripDateRaw.")
+
+            // image source URL
             val stripImageMetadata: Elements = stripEntry.select(".entry-content").first().getElementsByTag("img")
             val stripImageSourceUrl: String = stripImageMetadata.attr("src")
+
+            // image alt text
             val stripImageAltText: String = stripImageMetadata.attr("alt")
+
+            // tags
             val stripTagsRaw: Elements = stripEntry.select(".entry-tags")
             val stripTags: ArrayList<String> = arrayListOf()
             if (stripTagsRaw.size >= 1) {
@@ -101,7 +87,18 @@ class WebpageScraper @Inject constructor() {
                     stripTags.add(rawTag.text())
                 }
             }
-            stripData = StripDataModel(urlString, stripTitle, stripDate, stripImageSourceUrl, stripImageAltText, stripTags)
+
+            // URL of previous strip
+            val adjacentStripEntries: Elements = stripEntry.select(".entry-navarrows").select("[rel=\"prev\"]")
+            val prevStripUrl: String? = if (adjacentStripEntries.size >= 1) {
+                val prevStripEntry: Elements = adjacentStripEntries.first().getElementsByTag("a")
+                prevStripEntry.attr("href")
+            } else {
+                null
+            }
+
+            // store in instance of data class
+            stripData = StripDataModel(urlString, stripTitle, stripDate, stripImageSourceUrl, stripImageAltText, stripTags, prevStripUrl)
         } catch (e: Exception) {
             return ScraperResult.Error(e)
         }

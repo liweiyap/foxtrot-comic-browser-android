@@ -17,4 +17,5 @@ data class StripDataModel(
     @PrimaryKey @Embedded val date: StripDate,
     val imageSrc: String,
     val imageAltText: String,
-    val tags: ArrayList<String>)
+    val tags: ArrayList<String>,
+    val prevStripUrl: String?)
