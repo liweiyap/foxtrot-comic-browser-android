@@ -90,7 +90,7 @@ class WebpageScraper @Inject constructor() {
             val stripTitle: String = stripEntry.select(".entry-newtitle").text()
             val stripDateRaw: String = stripEntry.select(".entry-summary").text()
             val stripDate: StripDate = DateFormatter.formatDate(stripDateRaw)
-                ?: throw Exception("WebpageScraper::scrapeStrip(): error retrieving date of strip.")
+                ?: throw Exception("WebpageScraper::scrapeStrip(): error retrieving date of strip from $stripDateRaw.")
             val stripImageMetadata: Elements = stripEntry.select(".entry-content").first().getElementsByTag("img")
             val stripImageSourceUrl: String = stripImageMetadata.attr("src")
             val stripImageAltText: String = stripImageMetadata.attr("alt")
