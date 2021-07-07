@@ -30,12 +30,13 @@ class ComicBrowserRepository @Inject constructor(private val scraper: WebpageScr
     }
 
     private suspend fun scrapeStripDataIfNotInDatabase(urlString: String) = withContext(Dispatchers.IO) {
-        val doesStripAlreadyExist: Boolean = stripDao.hasStrip(urlString)
-        if (!doesStripAlreadyExist) {
-            val strip: ScraperResult<StripDataModel> = scraper.scrapeStripDataMainSafe(urlString)
-            if (strip is ScraperResult.Success<StripDataModel>) {
-                stripDao.insert(strip.data)
-            }
+        if (stripDao.hasStrip(urlString)) {
+            return@withContext
+        }
+
+        val strip: ScraperResult<StripDataModel> = scraper.scrapeStripDataMainSafe(urlString)
+        if (strip is ScraperResult.Success<StripDataModel>) {
+            stripDao.insert(strip.data)
         }
     }
 
