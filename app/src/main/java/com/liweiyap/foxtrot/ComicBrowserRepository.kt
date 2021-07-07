@@ -1,9 +1,9 @@
 package com.liweiyap.foxtrot
 
-import com.liweiyap.foxtrot.util.database.StripDao
-import com.liweiyap.foxtrot.util.database.StripDataModel
-import com.liweiyap.foxtrot.util.scraper.ScraperResult
-import com.liweiyap.foxtrot.util.scraper.WebpageScraper
+import com.liweiyap.foxtrot.database.StripDao
+import com.liweiyap.foxtrot.database.StripDataModel
+import com.liweiyap.foxtrot.scraper.ScraperResult
+import com.liweiyap.foxtrot.scraper.WebpageScraper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject

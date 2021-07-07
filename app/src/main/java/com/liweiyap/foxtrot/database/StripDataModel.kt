@@ -1,4 +1,4 @@
-package com.liweiyap.foxtrot.util.database
+package com.liweiyap.foxtrot.database
 
 import androidx.room.ColumnInfo
 import androidx.room.Embedded

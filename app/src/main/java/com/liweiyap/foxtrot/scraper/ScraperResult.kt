@@ -1,4 +1,4 @@
-package com.liweiyap.foxtrot.util.scraper
+package com.liweiyap.foxtrot.scraper
 
 sealed class ScraperResult<out R> {
     data class Success<out T>(val data: T) : ScraperResult<T>()

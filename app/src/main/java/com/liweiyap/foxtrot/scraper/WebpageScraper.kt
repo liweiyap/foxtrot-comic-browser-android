@@ -1,6 +1,6 @@
-package com.liweiyap.foxtrot.util.scraper
+package com.liweiyap.foxtrot.scraper
 
-import com.liweiyap.foxtrot.util.database.StripDataModel
+import com.liweiyap.foxtrot.database.StripDataModel
 import com.liweiyap.foxtrot.util.StripDate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
