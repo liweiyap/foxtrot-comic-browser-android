@@ -21,7 +21,7 @@ object DateFormatter {
     @RequiresApi(Build.VERSION_CODES.O)
     @JvmStatic fun formatDateSinceApi26(rawDate: String): StripDate? {
         return try {
-            val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern(datePattern)
+            val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern(DATE_PATTERN)
             val date: LocalDate = LocalDate.parse(rawDate, formatter)
             StripDate(date.dayOfMonth, date.monthValue, date.year)
         } catch (e: Exception) {
@@ -31,7 +31,7 @@ object DateFormatter {
 
     @JvmStatic fun formatDatePreApi26(rawDate: String): StripDate? {
         return try {
-            val format = SimpleDateFormat(datePattern, Locale.ENGLISH)
+            val format = SimpleDateFormat(DATE_PATTERN, Locale.ENGLISH)
             val date: Date = format.parse(rawDate)
             val day: Int = Integer.parseInt(DateFormat.format("dd", date) as String)
             val month: Int = Integer.parseInt(DateFormat.format("M", date) as String)
@@ -42,5 +42,5 @@ object DateFormatter {
         }
     }
 
-    private const val datePattern: String = "'Published' MMMM d, yyyy"
+    private const val DATE_PATTERN: String = "'Published' MMMM d, yyyy"
 }

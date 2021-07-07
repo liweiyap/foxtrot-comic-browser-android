@@ -1,6 +1,6 @@
 package com.liweiyap.foxtrot.util.scraper
 
-import com.liweiyap.foxtrot.util.StripDataModel
+import com.liweiyap.foxtrot.util.database.StripDataModel
 import com.liweiyap.foxtrot.util.StripDate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -13,25 +13,19 @@ import javax.inject.Inject
 
 class WebpageScraper @Inject constructor() {
 
-    suspend fun scrapeLatestStripMainSafe(): ScraperResult<StripDataModel> {
+    suspend fun scrapeLatestStripDataMainSafe(): ScraperResult<StripDataModel> {
         return withContext(Dispatchers.IO) {
-            scrapeLatestStrip()
+            scrapeLatestStripData()
         }
     }
 
-    suspend fun scrapePrevStripMainSafe(currentStripUrlString: String): ScraperResult<StripDataModel> {
+    suspend fun scrapeStripDataMainSafe(urlString: String): ScraperResult<StripDataModel> {
         return withContext(Dispatchers.IO) {
-            scrapePrevStrip(currentStripUrlString)
+            scrapeStripData(urlString)
         }
     }
 
-    suspend fun getStripCountMainSafe(): ScraperResult<Int> {
-        return withContext(Dispatchers.IO) {
-            getStripCount()
-        }
-    }
-
-    private fun scrapeLatestStrip(): ScraperResult<StripDataModel> {
+    private fun scrapeLatestStripData(): ScraperResult<StripDataModel> {
         val strip: StripDataModel
 
         try {
@@ -43,7 +37,7 @@ class WebpageScraper @Inject constructor() {
             val latestStripElement: Element = homePageStripElements.first()
             val latestStripEntry: Elements = latestStripElement.getElementsByTag("a")
             mLatestStripUrlString = latestStripEntry.attr("href")  // if attr does not exist, `.attr()` returns an empty String
-            val latestStripLinkScrapeResult = scrapeStrip(mLatestStripUrlString)
+            val latestStripLinkScrapeResult = scrapeStripData(mLatestStripUrlString)
             if (latestStripLinkScrapeResult is ScraperResult.Success<StripDataModel>) {
                 strip = latestStripLinkScrapeResult.component1()
             } else {
@@ -56,44 +50,30 @@ class WebpageScraper @Inject constructor() {
         return ScraperResult.Success(strip)
     }
 
-    private fun scrapePrevStrip(currentStripUrlString: String): ScraperResult<StripDataModel> {
-        val strip: StripDataModel
-
-        try {
-            val currentStripPage: Document = Jsoup.connect(currentStripUrlString).timeout(mConnectionTimeoutInMilliSecs).get()
-            val currentStripEntry: Elements = currentStripPage.getElementsByClass("entry")
-            val adjacentStripEntries: Elements = currentStripEntry.select(".entry-navarrows").select("[rel=\"prev\"]")
-            if (adjacentStripEntries.size < 1) {
-                throw Exception("WebpageScraper::scrapePrevStrip(): Strip with URL $currentStripUrlString does not have a previous strip.")
-            }
-            val prevStripEntry: Elements = adjacentStripEntries.first().getElementsByTag("a")
-            val prevStripLink: String = prevStripEntry.attr("href")
-            val prevStripLinkScrapeResult = scrapeStrip(prevStripLink)
-            if (prevStripLinkScrapeResult is ScraperResult.Success<StripDataModel>) {
-                strip = prevStripLinkScrapeResult.component1()
-            } else {
-                throw Exception("WebpageScraper::scrapePrevStrip(): error scraping link to previous strip.")
-            }
-        } catch (e: Exception) {
-            return ScraperResult.Error(e)
-        }
-
-        return ScraperResult.Success(strip)
-    }
-
-    private fun scrapeStrip(urlString: String): ScraperResult<StripDataModel> {
+    private fun scrapeStripData(urlString: String): ScraperResult<StripDataModel> {
         val stripData: StripDataModel
 
         try {
+            // establish connection
             val stripPage: Document = Jsoup.connect(urlString).timeout(mConnectionTimeoutInMilliSecs).get()
+
+            // title
             val stripEntry: Elements = stripPage.getElementsByClass("entry")
             val stripTitle: String = stripEntry.select(".entry-newtitle").text()
+
+            // date
             val stripDateRaw: String = stripEntry.select(".entry-summary").text()
             val stripDate: StripDate = DateFormatter.formatDate(stripDateRaw)
-                ?: throw Exception("WebpageScraper::scrapeStrip(): error retrieving date of strip.")
+                ?: throw Exception("WebpageScraper::scrapeStrip(): error retrieving date of strip from $stripDateRaw.")
+
+            // image source URL
             val stripImageMetadata: Elements = stripEntry.select(".entry-content").first().getElementsByTag("img")
             val stripImageSourceUrl: String = stripImageMetadata.attr("src")
+
+            // image alt text
             val stripImageAltText: String = stripImageMetadata.attr("alt")
+
+            // tags
             val stripTagsRaw: Elements = stripEntry.select(".entry-tags")
             val stripTags: ArrayList<String> = arrayListOf()
             if (stripTagsRaw.size >= 1) {
@@ -101,37 +81,23 @@ class WebpageScraper @Inject constructor() {
                     stripTags.add(rawTag.text())
                 }
             }
-            stripData = StripDataModel(urlString, stripTitle, stripDate, stripImageSourceUrl, stripImageAltText, stripTags)
+
+            // URL of previous strip
+            val adjacentStripEntries: Elements = stripEntry.select(".entry-navarrows").select("[rel=\"prev\"]")
+            val prevStripUrl: String? = if (adjacentStripEntries.size >= 1) {
+                val prevStripEntry: Elements = adjacentStripEntries.first().getElementsByTag("a")
+                prevStripEntry.attr("href")
+            } else {
+                null
+            }
+
+            // store in instance of data class
+            stripData = StripDataModel(urlString, stripTitle, stripDate, stripImageSourceUrl, stripImageAltText, stripTags, prevStripUrl)
         } catch (e: Exception) {
             return ScraperResult.Error(e)
         }
 
         return ScraperResult.Success(stripData)
-    }
-
-    private fun getStripCount(): ScraperResult<Int> {
-        val numberOfStrips: Int
-        val stripsPerPage = 6
-
-        try {
-            val homePage: Document = Jsoup.connect(mHomeUrlString).timeout(mConnectionTimeoutInMilliSecs).get()
-            val pageNavigator: Elements = homePage.getElementsByClass("navigation")
-            val pageNumbers: Elements = pageNavigator.select(".page-numbers")
-            val lastPageNumber: Element = pageNumbers[pageNumbers.size - 2]
-            val numberOfPages: Int = Integer.valueOf(lastPageNumber.text())
-            val lastPageAttr: Elements = lastPageNumber.getElementsByTag("a")
-            val lastPageUrl: String = lastPageAttr.attr("href")
-            val lastPage: Document = Jsoup.connect(lastPageUrl).timeout(mConnectionTimeoutInMilliSecs).get()
-            val lastPageStripElements: Elements = lastPage.getElementsByTag("article")
-            numberOfStrips = (numberOfPages - 1) * stripsPerPage + lastPageStripElements.size
-            if (numberOfStrips < 0) {
-                throw Exception("WebpageScraper::getNumberOfStrips(): no. of strips cannot be negative.")
-            }
-        } catch (e: Exception) {
-            return ScraperResult.Error(e)
-        }
-
-        return ScraperResult.Success(numberOfStrips)
     }
 
     fun getLatestStripUrl(): String? {
@@ -144,5 +110,5 @@ class WebpageScraper @Inject constructor() {
     private val mHomeUrlString: String = "https://foxtrot.com/"
     private lateinit var mLatestStripUrlString: String
 
-    private val mConnectionTimeoutInMilliSecs: Int = 5000
+    private val mConnectionTimeoutInMilliSecs: Int = 15000
 }
