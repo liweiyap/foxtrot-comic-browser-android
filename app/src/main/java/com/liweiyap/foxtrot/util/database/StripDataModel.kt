@@ -1,8 +1,10 @@
-package com.liweiyap.foxtrot.util
+package com.liweiyap.foxtrot.util.database
 
+import androidx.room.ColumnInfo
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.liweiyap.foxtrot.util.StripDate
 
 /**
  * If @PrimaryKey annotation is used on an @Embedded field,
@@ -10,12 +12,12 @@ import androidx.room.PrimaryKey
  * (including its grand children fields).
  * (https://medium.com/@kinnerapriyap/entity-embedded-and-composite-primary-keys-with-room-db-8cb6ca6256e8)
  */
-@Entity(tableName = "Strips")
+@Entity(tableName = "strips")
 data class StripDataModel(
-    val url: String,
+    @PrimaryKey val url: String,
     val title: String,
-    @PrimaryKey @Embedded val date: StripDate,
-    val imageSrc: String,
-    val imageAltText: String,
+    @Embedded val date: StripDate,
+    @ColumnInfo(name = "image_src") val imageSrc: String,
+    @ColumnInfo(name = "image_alt_text") val imageAltText: String,
     val tags: ArrayList<String>,
-    val prevStripUrl: String?)
+    @ColumnInfo(name = "prev_strip_url") val prevStripUrl: String?)

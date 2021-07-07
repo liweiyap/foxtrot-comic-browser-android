@@ -1,10 +1,11 @@
-package com.liweiyap.foxtrot.util
+package com.liweiyap.foxtrot.util.database
 
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import com.liweiyap.foxtrot.util.DataConverter
 
 @Database(entities = [StripDataModel::class], version = 1)
 @TypeConverters(DataConverter::class)

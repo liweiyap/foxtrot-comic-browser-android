@@ -1,4 +1,4 @@
-package com.liweiyap.foxtrot.util
+package com.liweiyap.foxtrot.util.database
 
 import android.content.Context
 import dagger.Module
