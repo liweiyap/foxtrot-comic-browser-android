@@ -1,9 +1,9 @@
 package com.liweiyap.foxtrot
 
-import com.liweiyap.foxtrot.util.database.StripDao
-import com.liweiyap.foxtrot.util.database.StripDataModel
-import com.liweiyap.foxtrot.util.scraper.ScraperResult
-import com.liweiyap.foxtrot.util.scraper.WebpageScraper
+import com.liweiyap.foxtrot.database.StripDao
+import com.liweiyap.foxtrot.database.StripDataModel
+import com.liweiyap.foxtrot.scraper.ScraperResult
+import com.liweiyap.foxtrot.scraper.WebpageScraper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -18,7 +18,7 @@ class ComicBrowserRepository @Inject constructor(private val scraper: WebpageScr
     }
 
     suspend fun fetchStripData(urlString: String): StripDataModel? = withContext(Dispatchers.IO) {
-        scrapeStripDataIfNotInDatabase(urlString)
+        scrapeStripData(urlString)
         return@withContext stripDao.get(urlString)
     }
 
@@ -29,13 +29,14 @@ class ComicBrowserRepository @Inject constructor(private val scraper: WebpageScr
         }
     }
 
-    private suspend fun scrapeStripDataIfNotInDatabase(urlString: String) = withContext(Dispatchers.IO) {
-        val doesStripAlreadyExist: Boolean = stripDao.hasStrip(urlString)
-        if (!doesStripAlreadyExist) {
-            val strip: ScraperResult<StripDataModel> = scraper.scrapeStripDataMainSafe(urlString)
-            if (strip is ScraperResult.Success<StripDataModel>) {
-                stripDao.insert(strip.data)
-            }
+    private suspend fun scrapeStripData(urlString: String) = withContext(Dispatchers.IO) {
+        if ( (stripDao.hasStrip(urlString)) && (stripDao.countLatest() == 1) ) {
+            return@withContext
+        }
+
+        val strip: ScraperResult<StripDataModel> = scraper.scrapeStripDataMainSafe(urlString)
+        if (strip is ScraperResult.Success<StripDataModel>) {
+            stripDao.insert(strip.data)
         }
     }
 

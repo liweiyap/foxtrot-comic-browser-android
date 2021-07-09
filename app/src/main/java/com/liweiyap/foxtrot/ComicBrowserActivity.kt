@@ -5,7 +5,7 @@ import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
-import com.liweiyap.foxtrot.util.database.StripDataModel
+import com.liweiyap.foxtrot.database.StripDataModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

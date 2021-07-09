@@ -1,4 +1,4 @@
-package com.liweiyap.foxtrot.util.database
+package com.liweiyap.foxtrot.database
 
 import androidx.room.ColumnInfo
 import androidx.room.Embedded
@@ -20,4 +20,5 @@ data class StripDataModel(
     @ColumnInfo(name = "image_src") val imageSrc: String,
     @ColumnInfo(name = "image_alt_text") val imageAltText: String,
     val tags: ArrayList<String>,
-    @ColumnInfo(name = "prev_strip_url") val prevStripUrl: String?)
+    @ColumnInfo(name = "prev_strip_url") val prevStripUrl: String?,
+    @ColumnInfo(name = "next_strip_url") val nextStripUrl: String?)

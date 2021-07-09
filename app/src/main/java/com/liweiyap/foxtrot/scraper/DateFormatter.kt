@@ -1,4 +1,4 @@
-package com.liweiyap.foxtrot.util.scraper
+package com.liweiyap.foxtrot.scraper
 
 import android.icu.text.SimpleDateFormat
 import android.os.Build

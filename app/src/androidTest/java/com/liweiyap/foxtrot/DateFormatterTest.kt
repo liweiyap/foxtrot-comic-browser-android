@@ -1,8 +1,8 @@
 package com.liweiyap.foxtrot
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.liweiyap.foxtrot.scraper.DateFormatter
 import com.liweiyap.foxtrot.util.StripDate
-import com.liweiyap.foxtrot.util.scraper.DateFormatter
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test

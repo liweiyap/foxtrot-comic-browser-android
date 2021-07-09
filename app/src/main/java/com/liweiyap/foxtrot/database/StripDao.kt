@@ -1,4 +1,4 @@
-package com.liweiyap.foxtrot.util.database
+package com.liweiyap.foxtrot.database
 
 import androidx.room.Dao
 import androidx.room.Insert
@@ -26,6 +26,12 @@ interface StripDao {
 
     @Query("SELECT * FROM strips WHERE url = :urlString")
     suspend fun get(urlString: String): StripDataModel?
+
+    @Query("SELECT COUNT(*) FROM (SELECT * FROM strips WHERE prev_strip_url IS NOT NULL AND next_strip_url IS NULL)")
+    suspend fun countLatest(): Int
+
+    @Query("SELECT COUNT(*) FROM (SELECT * FROM strips WHERE prev_strip_url IS NULL AND next_strip_url IS NOT NULL)")
+    suspend fun countEarliest(): Int
 
     @Query("SELECT EXISTS(SELECT 1 FROM strips WHERE url = :urlString LIMIT 1)")
     suspend fun hasStrip(urlString: String): Boolean
