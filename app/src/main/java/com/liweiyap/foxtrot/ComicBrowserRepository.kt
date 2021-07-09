@@ -18,7 +18,7 @@ class ComicBrowserRepository @Inject constructor(private val scraper: WebpageScr
     }
 
     suspend fun fetchStripData(urlString: String): StripDataModel? = withContext(Dispatchers.IO) {
-        scrapeStripDataIfNotInDatabase(urlString)
+        scrapeStripData(urlString)
         return@withContext stripDao.get(urlString)
     }
 
@@ -29,8 +29,8 @@ class ComicBrowserRepository @Inject constructor(private val scraper: WebpageScr
         }
     }
 
-    private suspend fun scrapeStripDataIfNotInDatabase(urlString: String) = withContext(Dispatchers.IO) {
-        if (stripDao.hasStrip(urlString)) {
+    private suspend fun scrapeStripData(urlString: String) = withContext(Dispatchers.IO) {
+        if ( (stripDao.hasStrip(urlString)) && (stripDao.countLatest() == 1) ) {
             return@withContext
         }
 

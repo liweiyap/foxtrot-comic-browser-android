@@ -83,16 +83,26 @@ class WebpageScraper @Inject constructor() {
             }
 
             // URL of previous strip
-            val adjacentStripEntries: Elements = stripEntry.select(".entry-navarrows").select("[rel=\"prev\"]")
-            val prevStripUrl: String? = if (adjacentStripEntries.size >= 1) {
-                val prevStripEntry: Elements = adjacentStripEntries.first().getElementsByTag("a")
+            val adjacentStripEntries: Elements = stripEntry.select(".entry-navarrows")
+            val prevStripEntries: Elements = adjacentStripEntries.select("[rel=\"prev\"]")
+            val prevStripUrl: String? = if (prevStripEntries.size >= 1) {
+                val prevStripEntry: Elements = prevStripEntries.first().getElementsByTag("a")
                 prevStripEntry.attr("href")
             } else {
                 null
             }
 
+            // URL of next strip
+            val nextStripEntries: Elements = adjacentStripEntries.select("[rel=\"next\"]")
+            val nextStripUrl: String? = if (nextStripEntries.size >= 1) {
+                val nextStripEntry: Elements = nextStripEntries.first().getElementsByTag("a")
+                nextStripEntry.attr("href")
+            } else {
+                null
+            }
+
             // store in instance of data class
-            stripData = StripDataModel(urlString, stripTitle, stripDate, stripImageSourceUrl, stripImageAltText, stripTags, prevStripUrl)
+            stripData = StripDataModel(urlString, stripTitle, stripDate, stripImageSourceUrl, stripImageAltText, stripTags, prevStripUrl, nextStripUrl)
         } catch (e: Exception) {
             return ScraperResult.Error(e)
         }
