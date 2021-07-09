@@ -21,4 +21,5 @@ data class StripDataModel(
     @ColumnInfo(name = "image_alt_text") val imageAltText: String,
     val tags: ArrayList<String>,
     @ColumnInfo(name = "prev_strip_url") val prevStripUrl: String?,
-    @ColumnInfo(name = "next_strip_url") val nextStripUrl: String?)
+    @ColumnInfo(name = "next_strip_url") val nextStripUrl: String?,
+    @ColumnInfo(name = "is_favourite") val isFavourite: Boolean)
