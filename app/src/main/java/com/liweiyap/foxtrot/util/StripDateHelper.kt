@@ -98,6 +98,13 @@ object StripDateHelper {
         return (days0 - days1)
     }
 
+    /**
+     * 0 means Mon, 1 means Tue, 2 means Wed, 3 means Thu, 4 means Fri, 5 means Sat, 6 means Sun
+     */
+    @JvmStatic fun getDayOfWeek(date: StripDate): Int {
+        return ((countDaysFromReferenceDate(date) + referenceDayOfWeek) % 7)
+    }
+
     private fun verifyYear(year: Int) {
         if (year < 1988) {
             throw InvalidParameterSpecException()
@@ -117,4 +124,5 @@ object StripDateHelper {
     }
 
     @JvmStatic val referenceDate = StripDate(1, 1, 1988)
+    private const val referenceDayOfWeek: Int = 4
 }
