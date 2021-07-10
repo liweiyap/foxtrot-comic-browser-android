@@ -22,6 +22,15 @@ class ComicBrowserRepository @Inject constructor(private val scraper: WebpageScr
         return@withContext stripDao.get(urlString)
     }
 
+    suspend fun getStripCount(): Int? = withContext(Dispatchers.IO) {
+        val stripCount: ScraperResult<Int> = scraper.getStripCountMainSafe()
+        if (stripCount is ScraperResult.Success<Int>) {
+            return@withContext stripCount.data
+        } else {
+            return@withContext null
+        }
+    }
+
     private suspend fun scrapeLatestStripData() = withContext(Dispatchers.IO) {
         val latestStrip: ScraperResult<StripDataModel> = scraper.scrapeLatestStripDataMainSafe()
         if (latestStrip is ScraperResult.Success<StripDataModel>) {

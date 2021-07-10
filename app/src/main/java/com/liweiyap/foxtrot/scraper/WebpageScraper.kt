@@ -25,6 +25,12 @@ class WebpageScraper @Inject constructor() {
         }
     }
 
+    suspend fun getStripCountMainSafe(): ScraperResult<Int> {
+        return withContext(Dispatchers.IO) {
+            getStripCount()
+        }
+    }
+
     private fun scrapeLatestStripData(): ScraperResult<StripDataModel> {
         val strip: StripDataModel
 
@@ -108,6 +114,31 @@ class WebpageScraper @Inject constructor() {
         }
 
         return ScraperResult.Success(stripData)
+    }
+
+    private fun getStripCount(): ScraperResult<Int> {
+        val numberOfStrips: Int
+        val stripsPerPage = 6
+
+        try {
+            val homePage: Document = Jsoup.connect(mHomeUrlString).timeout(mConnectionTimeoutInMilliSecs).get()
+            val pageNavigator: Elements = homePage.getElementsByClass("navigation")
+            val pageNumbers: Elements = pageNavigator.select(".page-numbers")
+            val lastPageNumber: Element = pageNumbers[pageNumbers.size - 2]
+            val numberOfPages: Int = Integer.valueOf(lastPageNumber.text())
+            val lastPageAttr: Elements = lastPageNumber.getElementsByTag("a")
+            val lastPageUrl: String = lastPageAttr.attr("href")
+            val lastPage: Document = Jsoup.connect(lastPageUrl).timeout(mConnectionTimeoutInMilliSecs).get()
+            val lastPageStripElements: Elements = lastPage.getElementsByTag("article")
+            numberOfStrips = (numberOfPages - 1) * stripsPerPage + lastPageStripElements.size
+            if (numberOfStrips < 0) {
+                throw Exception("WebpageScraper::getNumberOfStrips(): no. of strips cannot be negative.")
+            }
+        } catch (e: Exception) {
+            return ScraperResult.Error(e)
+        }
+
+        return ScraperResult.Success(numberOfStrips)
     }
 
     fun getLatestStripUrl(): String? {

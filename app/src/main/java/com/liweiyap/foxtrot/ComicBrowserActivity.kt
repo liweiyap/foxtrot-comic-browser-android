@@ -5,6 +5,7 @@ import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
+import com.google.android.material.progressindicator.LinearProgressIndicator
 import com.liweiyap.foxtrot.database.StripDataModel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -15,20 +16,46 @@ class ComicBrowserActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val stripDataObserver = Observer<StripDataModel?> { result ->
-            val tv: TextView = findViewById(R.id.hello_world)
+        mLoadingProgressIndicator = findViewById(R.id.loadingProgressIndicator)
 
-            if (result == null) {
-                tv.text = "Fail"
-            } else {
-                tv.text = result.date.toString()
-            }
+        val stripCountObserver = Observer<Int?> { count ->
+            mLoadingProgressIndicator.isIndeterminate = (count == null)
         }
 
-        vm.stripDataResult.observe(this, stripDataObserver)
+        mViewModel.stripCountResult.observe(this, stripCountObserver)
+        mViewModel.countStrips()
 
-        vm.scrapeAllStrips()
+        val loadingStripDataObserver = Observer<StripDataModel?> { fetchedStrip ->
+            if (fetchedStrip == null) {
+                mLoadingProgressIndicator.hide()
+                return@Observer
+            }
+
+            if ( (mViewModel.stripCountResult.value == null) || (mViewModel.stripCountResult.value == 0) ) {
+                return@Observer
+            }
+
+            mLoadingProgressIndicator.setProgressCompat((++mStripsFetched) * 100 / mViewModel.stripCountResult.value!!, true)
+        }
+
+        mViewModel.loadingStripDataResult.observe(this, loadingStripDataObserver)
+        mViewModel.fetchAllStripData()
+
+        val displayedStripDataObserver = Observer<StripDataModel?> { fetchedStrip ->
+            if (fetchedStrip == null) {
+                return@Observer
+            }
+
+            val tv: TextView = findViewById(R.id.hello_world)
+            tv.text = fetchedStrip.date.toString()
+        }
+
+        mViewModel.displayedStripDataResult.observe(this, displayedStripDataObserver)
+        mViewModel.fetchLatestStripData()
     }
 
-    private val vm: ComicBrowserViewModel by viewModels()
+    private val mViewModel: ComicBrowserViewModel by viewModels()
+    private var mStripsFetched: Int = 0
+
+    private lateinit var mLoadingProgressIndicator: LinearProgressIndicator
 }
