@@ -4,6 +4,7 @@ import com.liweiyap.foxtrot.util.StripDate
 import com.liweiyap.foxtrot.util.StripDateHelper
 import org.junit.Assert.*
 import org.junit.Test
+import java.security.spec.InvalidParameterSpecException
 
 class StripDateTest {
     @Test
@@ -39,5 +40,24 @@ class StripDateTest {
         assertThrows(Exception::class.java) { StripDate(31, 0, 1988) }
 
         assertTrue(StripDateHelper.isValidDate(StripDate(29, 2, 2020)))
+    }
+
+    @Test
+    fun testDayOfWeek() {
+        val dayOfWeek: (StripDate) -> String = { date: StripDate ->
+            when (date.getDayOfWeek()) {
+                0 -> "Mon"
+                1 -> "Tue"
+                2 -> "Wed"
+                3 -> "Thu"
+                4 -> "Fri"
+                5 -> "Sat"
+                6 -> "Sun"
+                else -> throw InvalidParameterSpecException()
+            }
+        }
+
+        assertEquals(dayOfWeek(StripDate(30, 8, 2010)), "Mon")
+        assertEquals(dayOfWeek(StripDate(4, 7, 2021)), "Sun")
     }
 }

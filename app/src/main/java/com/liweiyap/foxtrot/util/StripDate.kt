@@ -19,4 +19,8 @@ data class StripDate(val day: Int, val month: Int, val year: Int) {
     operator fun minus(other: StripDate): Int {
         return StripDateHelper.countDifferenceInDays(this, other)
     }
+
+    fun getDayOfWeek(): Int {
+        return StripDateHelper.getDayOfWeek(this)
+    }
 }
