@@ -5,6 +5,7 @@ import com.liweiyap.foxtrot.database.StripDataModel
 import com.liweiyap.foxtrot.scraper.ScraperResult
 import com.liweiyap.foxtrot.scraper.WebpageScraper
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
@@ -30,6 +31,9 @@ class ComicBrowserRepository @Inject constructor(private val scraper: WebpageScr
             return@withContext null
         }
     }
+
+    fun getDatabaseSize(): Flow<Int> =
+        stripDao.getDatabaseSize()
 
     private suspend fun scrapeLatestStripData() = withContext(Dispatchers.IO) {
         val latestStrip: ScraperResult<StripDataModel> = scraper.scrapeLatestStripDataMainSafe()

@@ -1,6 +1,7 @@
 package com.liweiyap.foxtrot
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -52,6 +53,10 @@ class ComicBrowserActivity : AppCompatActivity() {
 
         mViewModel.displayedStripDataResult.observe(this, displayedStripDataObserver)
         mViewModel.fetchLatestStripData()
+
+        mViewModel.databaseSize.observe(this, { count ->
+            Log.v("Database Size", count.toString())
+        })
     }
 
     private val mViewModel: ComicBrowserViewModel by viewModels()

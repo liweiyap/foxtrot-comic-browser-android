@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import kotlinx.coroutines.flow.Flow
 
 /**
  * Note that querying a table with a return type of Flow<T> always returns the first row in the result set,
@@ -32,6 +33,9 @@ interface StripDao {
 
     @Query("SELECT COUNT(*) FROM (SELECT * FROM strips WHERE prev_strip_url IS NULL AND next_strip_url IS NOT NULL)")
     suspend fun countEarliest(): Int
+
+    @Query("SELECT COUNT(url) FROM strips")
+    fun getDatabaseSize(): Flow<Int>
 
     @Query("SELECT EXISTS(SELECT 1 FROM strips WHERE url = :urlString LIMIT 1)")
     suspend fun hasStrip(urlString: String): Boolean

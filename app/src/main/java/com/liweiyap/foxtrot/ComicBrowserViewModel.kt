@@ -1,9 +1,6 @@
 package com.liweiyap.foxtrot
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.liweiyap.foxtrot.database.StripDataModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -48,4 +45,6 @@ class ComicBrowserViewModel @Inject constructor(private val repo: ComicBrowserRe
     private val _stripCountResult = MutableLiveData<Int?>()
     val stripCountResult: LiveData<Int?>
         get() = _stripCountResult
+
+    val databaseSize: LiveData<Int> = repo.getDatabaseSize().asLiveData()
 }
