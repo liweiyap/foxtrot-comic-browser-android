@@ -7,7 +7,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.text.DateFormatSymbols
 
 /**
  * Instrumented test, which will execute on an Android device.
@@ -35,11 +34,6 @@ class DateFormatterTest {
 
     private fun testPreExpectedFailure(rawDate: String) {
         assertNull(DateFormatter.formatDatePreApi26(rawDate))
-    }
-
-    // https://stackoverflow.com/questions/1038570/how-can-i-convert-an-integer-to-localized-month-name-in-java
-    private fun getMonthName(month: Int): String? {
-        return DateFormatSymbols().months[month - 1]
     }
 
     @Test fun testDate0Since() = testSinceExpectedSuccess("Published June 27, 2021", 27, 6, 2021)
