@@ -9,14 +9,6 @@ import javax.inject.Inject
 @HiltViewModel
 class ComicBrowserViewModel @Inject constructor(private val repo: ComicBrowserRepository): ViewModel() {
 
-    fun fetchLatestStripData() = viewModelScope.launch {
-        _displayedStripDataResult.value = repo.fetchLatestStripData()
-    }
-
-    fun fetchStripData(urlString: String) = viewModelScope.launch {
-        _displayedStripDataResult.value = repo.fetchStripData(urlString)
-    }
-
     fun fetchAllStripData() = viewModelScope.launch {
         _loadingStripDataResult.value = repo.fetchLatestStripData()
 
@@ -38,13 +30,9 @@ class ComicBrowserViewModel @Inject constructor(private val repo: ComicBrowserRe
     val loadingStripDataResult: LiveData<StripDataModel?>
         get() = _loadingStripDataResult
 
-    private val _displayedStripDataResult = MutableLiveData<StripDataModel?>()
-    val displayedStripDataResult: LiveData<StripDataModel?>
-        get() = _displayedStripDataResult
-
     private val _stripCountResult = MutableLiveData<Int?>()
     val stripCountResult: LiveData<Int?>
         get() = _stripCountResult
 
-    val databaseSize: LiveData<Int> = repo.getDatabaseSize().asLiveData()
+    val database: LiveData<List<StripDataModel>> = repo.getDatabase().asLiveData()
 }

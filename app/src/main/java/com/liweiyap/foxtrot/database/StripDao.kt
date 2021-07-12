@@ -37,6 +37,9 @@ interface StripDao {
     @Query("SELECT COUNT(url) FROM strips")
     fun getDatabaseSize(): Flow<Int>
 
+    @Query("SELECT * FROM strips ORDER BY year DESC, month DESC, day DESC")
+    fun getAll(): Flow<List<StripDataModel>>
+
     @Query("SELECT EXISTS(SELECT 1 FROM strips WHERE url = :urlString LIMIT 1)")
     suspend fun hasStrip(urlString: String): Boolean
 }
