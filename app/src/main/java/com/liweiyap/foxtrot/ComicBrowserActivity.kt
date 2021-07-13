@@ -1,12 +1,13 @@
 package com.liweiyap.foxtrot
 
 import android.os.Bundle
-import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
+import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.progressindicator.LinearProgressIndicator
 import com.liweiyap.foxtrot.database.StripDataModel
+import com.liweiyap.foxtrot.ui.StripFragmentStateAdapter
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -17,6 +18,7 @@ class ComicBrowserActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         mLoadingProgressIndicator = findViewById(R.id.loadingProgressIndicator)
+        mStripPager = findViewById(R.id.stripPager)
 
         val stripCountObserver = Observer<Int?> { count ->
             mLoadingProgressIndicator.isIndeterminate = (count == null)
@@ -35,27 +37,24 @@ class ComicBrowserActivity : AppCompatActivity() {
                 return@Observer
             }
 
-            mLoadingProgressIndicator.setProgressCompat((++mStripsFetched) * 100 / mViewModel.stripCountResult.value!!, true)
+            mLoadingProgressIndicator.setProgressCompat(
+                (++mStripsFetched) * 100 / mViewModel.stripCountResult.value!!,
+                true)
         }
 
         mViewModel.loadingStripDataResult.observe(this, loadingStripDataObserver)
         mViewModel.fetchAllStripData()
 
-        val displayedStripDataObserver = Observer<StripDataModel?> { fetchedStrip ->
-            if (fetchedStrip == null) {
-                return@Observer
-            }
-
-            val tv: TextView = findViewById(R.id.hello_world)
-            tv.text = fetchedStrip.date.toString()
-        }
-
-        mViewModel.displayedStripDataResult.observe(this, displayedStripDataObserver)
-        mViewModel.fetchLatestStripData()
+        mViewModel.database.observe(this, { database ->
+            // AppCompatActivity extends FragmentActivity
+            val pagerAdapter = StripFragmentStateAdapter(this, database)
+            mStripPager.adapter = pagerAdapter
+        })
     }
 
     private val mViewModel: ComicBrowserViewModel by viewModels()
     private var mStripsFetched: Int = 0
 
     private lateinit var mLoadingProgressIndicator: LinearProgressIndicator
+    private lateinit var mStripPager: ViewPager2
 }
