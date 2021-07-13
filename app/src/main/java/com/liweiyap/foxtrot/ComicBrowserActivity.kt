@@ -7,7 +7,7 @@ import androidx.lifecycle.Observer
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.progressindicator.LinearProgressIndicator
 import com.liweiyap.foxtrot.database.StripDataModel
-import com.liweiyap.foxtrot.ui.StripFragmentPagerAdapter
+import com.liweiyap.foxtrot.ui.StripFragmentStateAdapter
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -46,7 +46,8 @@ class ComicBrowserActivity : AppCompatActivity() {
         mViewModel.fetchAllStripData()
 
         mViewModel.database.observe(this, { database ->
-            val pagerAdapter = StripFragmentPagerAdapter(supportFragmentManager, lifecycle, database)
+            // AppCompatActivity extends FragmentActivity
+            val pagerAdapter = StripFragmentStateAdapter(this, database)
             mStripPager.adapter = pagerAdapter
         })
     }
