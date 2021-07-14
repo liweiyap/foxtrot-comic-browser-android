@@ -4,10 +4,11 @@ import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.DiffUtil
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.progressindicator.LinearProgressIndicator
 import com.liweiyap.foxtrot.database.StripDataModel
-import com.liweiyap.foxtrot.ui.StripFragmentStateAdapter
+import com.liweiyap.foxtrot.ui.StripAdapter
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -46,14 +47,31 @@ class ComicBrowserActivity : AppCompatActivity() {
         mViewModel.fetchAllStripData()
 
         mViewModel.database.observe(this, { database ->
-            // AppCompatActivity extends FragmentActivity
-            val pagerAdapter = StripFragmentStateAdapter(this, database)
-            mStripPager.adapter = pagerAdapter
+            if (mStripPager.adapter == null) {
+                mStripPager.adapter = StripAdapter(database)
+            }
+
+            (mStripPager.adapter as StripAdapter).setData(database)
+
+            DiffUtil.calculateDiff(object : DiffUtil.Callback(){
+                override fun getOldListSize() = mOldDatabase.size
+
+                override fun getNewListSize() = database.size
+
+                override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int) =
+                    mOldDatabase[oldItemPosition] == database[newItemPosition]
+
+                override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int) =
+                    areItemsTheSame(oldItemPosition, newItemPosition)
+            }, false).dispatchUpdatesTo(mStripPager.adapter!!)
+
+            mOldDatabase = database
         })
     }
 
     private val mViewModel: ComicBrowserViewModel by viewModels()
     private var mStripsFetched: Int = 0
+    private var mOldDatabase: List<StripDataModel> = listOf()
 
     private lateinit var mLoadingProgressIndicator: LinearProgressIndicator
     private lateinit var mStripPager: ViewPager2
