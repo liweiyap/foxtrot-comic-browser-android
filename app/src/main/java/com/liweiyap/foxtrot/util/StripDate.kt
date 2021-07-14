@@ -12,15 +12,12 @@ data class StripDate(val day: Int, val month: Int, val year: Int) {
         }
     }
 
-    operator fun compareTo(other: StripDate): Int {
-        return StripDateHelper.countDifferenceInDays(this, other)
-    }
+    operator fun compareTo(other: StripDate): Int =
+        StripDateHelper.countDifferenceInDays(this, other)
 
-    operator fun minus(other: StripDate): Int {
-        return StripDateHelper.countDifferenceInDays(this, other)
-    }
+    operator fun minus(other: StripDate): Int =
+        StripDateHelper.countDifferenceInDays(this, other)
 
-    fun getDayOfWeek(): Int {
-        return StripDateHelper.getDayOfWeek(this)
-    }
+    fun getDayOfWeek(): Int =
+        StripDateHelper.getDayOfWeek(this)
 }
