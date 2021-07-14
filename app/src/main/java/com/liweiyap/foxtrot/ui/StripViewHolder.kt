@@ -11,7 +11,7 @@ import java.text.DateFormatSymbols
 import java.util.*
 
 class StripViewHolder(parent: ViewGroup): RecyclerView.ViewHolder(
-    LayoutInflater.from(parent.context).inflate(R.layout.fragment_strip, parent, false)
+    LayoutInflater.from(parent.context).inflate(R.layout.viewgroup_strip, parent, false)
 ) {
     private val stripTitle: TextView = itemView.findViewById(R.id.stripTitle)
     private val stripDate: TextView = itemView.findViewById(R.id.stripDate)
