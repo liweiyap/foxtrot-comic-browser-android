@@ -10,10 +10,10 @@ import java.lang.reflect.Type
  * https://stackoverflow.com/a/45071364/12367873
  * https://medium.com/@toddcookevt/android-room-storing-lists-of-objects-766cca57e3f9
  */
-class DataConverter {
+object DatatypeConverter {
 
     @TypeConverter
-    fun getArrayListFromJsonString(string: String?): ArrayList<String?>? {
+    @JvmStatic fun getArrayListFromJsonString(string: String?): ArrayList<String?>? {
         if (string == null) {
             return arrayListOf()
         }
@@ -23,5 +23,6 @@ class DataConverter {
     }
 
     @TypeConverter
-    fun getJsonStringFromArrayList(list: ArrayList<String?>?): String? = Gson().toJson(list)
+    @JvmStatic fun getJsonStringFromArrayList(list: ArrayList<String?>?): String? =
+        Gson().toJson(list)
 }

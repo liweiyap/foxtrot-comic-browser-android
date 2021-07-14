@@ -5,10 +5,10 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import com.liweiyap.foxtrot.util.DataConverter
+import com.liweiyap.foxtrot.util.DatatypeConverter
 
 @Database(entities = [StripDataModel::class], version = 1)
-@TypeConverters(DataConverter::class)
+@TypeConverters(DatatypeConverter::class)
 abstract class StripDatabase: RoomDatabase() {
 
     abstract fun getStripDao(): StripDao
