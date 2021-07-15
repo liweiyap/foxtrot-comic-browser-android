@@ -3,6 +3,7 @@ package com.liweiyap.foxtrot
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.viewpager2.widget.ViewPager2
@@ -18,19 +19,28 @@ class ComicBrowserActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        mLoadingProgressIndicator = findViewById(R.id.loadingProgressIndicator)
+        mStripFetchProgressIndicator = findViewById(R.id.stripFetchProgressIndicator)
         mStripPager = findViewById(R.id.stripPager)
 
         val stripCountObserver = Observer<Int?> { count ->
-            mLoadingProgressIndicator.isIndeterminate = (count == null)
+            // To avoid IllegalStateException: Cannot switch to indeterminate mode while the progress indicator is visible.
+            // (see: https://github.com/material-components/material-components-android/issues/1921)
+            if (count == null) {
+                mStripFetchProgressIndicator.isVisible = false
+                mStripFetchProgressIndicator.isIndeterminate = true
+                mStripFetchProgressIndicator.isVisible = true
+                return@Observer
+            }
+
+            mStripFetchProgressIndicator.isIndeterminate = false
         }
 
         mViewModel.stripCountResult.observe(this, stripCountObserver)
         mViewModel.countStrips()
 
-        val loadingStripDataObserver = Observer<StripDataModel?> { fetchedStrip ->
+        val fetchingStripDataObserver = Observer<StripDataModel?> { fetchedStrip ->
             if (fetchedStrip == null) {
-                mLoadingProgressIndicator.hide()
+                mStripFetchProgressIndicator.hide()
                 return@Observer
             }
 
@@ -38,12 +48,12 @@ class ComicBrowserActivity : AppCompatActivity() {
                 return@Observer
             }
 
-            mLoadingProgressIndicator.setProgressCompat(
+            mStripFetchProgressIndicator.setProgressCompat(
                 (++mStripsFetched) * 100 / mViewModel.stripCountResult.value!!,
                 true)
         }
 
-        mViewModel.loadingStripDataResult.observe(this, loadingStripDataObserver)
+        mViewModel.fetchingStripDataResult.observe(this, fetchingStripDataObserver)
         mViewModel.fetchAllStripData()
 
         mViewModel.database.observe(this, { database ->
@@ -73,6 +83,6 @@ class ComicBrowserActivity : AppCompatActivity() {
     private var mStripsFetched: Int = 0
     private var mOldDatabase: List<StripDataModel> = listOf()
 
-    private lateinit var mLoadingProgressIndicator: LinearProgressIndicator
+    private lateinit var mStripFetchProgressIndicator: LinearProgressIndicator
     private lateinit var mStripPager: ViewPager2
 }

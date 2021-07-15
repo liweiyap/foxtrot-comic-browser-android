@@ -1,15 +1,28 @@
-package com.liweiyap.foxtrot.scraper
+package com.liweiyap.foxtrot.util
 
 import android.icu.text.SimpleDateFormat
 import android.os.Build
 import android.text.format.DateFormat
 import androidx.annotation.RequiresApi
-import com.liweiyap.foxtrot.util.StripDate
+import java.text.DateFormatSymbols
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.*
 
 object DateFormatter {
+
+    @JvmStatic fun formatDate(date: StripDate): String {
+        val dayOfWeek: (StripDate) -> String = { _date: StripDate ->
+            DateFormatSymbols(Locale.ENGLISH).shortWeekdays[_date.getDayOfWeek()]
+        }
+
+        // https://stackoverflow.com/questions/1038570/how-can-i-convert-an-integer-to-localized-month-name-in-java
+        val monthName: (StripDate) -> String = { _date: StripDate ->
+            DateFormatSymbols(Locale.ENGLISH).shortMonths[_date.month - 1]
+        }
+
+        return dayOfWeek(date) + ", " + date.day + " " + monthName(date) + " " + date.year
+    }
 
     @JvmStatic fun formatDate(rawDate: String): StripDate? {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

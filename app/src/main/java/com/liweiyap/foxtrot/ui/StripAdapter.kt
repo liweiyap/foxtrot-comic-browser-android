@@ -9,12 +9,12 @@ import com.liweiyap.foxtrot.database.StripDataModel
  * http://frogermcs.github.io/inject-everything-viewholder-and-dagger-2-example/
  * https://stackoverflow.com/questions/63697582/how-to-inject-adapter-with-hilt
  */
-class StripAdapter(private var database: List<StripDataModel>): RecyclerView.Adapter<StripViewHolder>() {
+class StripAdapter(private var database: List<StripDataModel>): RecyclerView.Adapter<StripHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
-        StripViewHolder(parent)
+        StripHolder(parent)
 
-    override fun onBindViewHolder(holder: StripViewHolder, position: Int) =
+    override fun onBindViewHolder(holder: StripHolder, position: Int) =
         holder.bind(database[position])
 
     override fun getItemCount() =

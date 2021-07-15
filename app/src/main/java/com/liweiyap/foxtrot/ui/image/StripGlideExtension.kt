@@ -1,4 +1,4 @@
-package com.liweiyap.foxtrot.ui
+package com.liweiyap.foxtrot.ui.image
 
 import androidx.annotation.NonNull
 import com.bumptech.glide.annotation.GlideExtension

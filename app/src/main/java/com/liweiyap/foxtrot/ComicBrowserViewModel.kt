@@ -10,15 +10,15 @@ import javax.inject.Inject
 class ComicBrowserViewModel @Inject constructor(private val repo: ComicBrowserRepository): ViewModel() {
 
     fun fetchAllStripData() = viewModelScope.launch {
-        _loadingStripDataResult.value = repo.fetchLatestStripData()
+        _fetchingStripDataResult.value = repo.fetchLatestStripData()
 
-        while (_loadingStripDataResult.value != null) {
-            if (_loadingStripDataResult.value!!.prevStripUrl == null) {
-                _loadingStripDataResult.value = null
+        while (_fetchingStripDataResult.value != null) {
+            if (_fetchingStripDataResult.value!!.prevStripUrl == null) {
+                _fetchingStripDataResult.value = null
                 continue
             }
 
-            _loadingStripDataResult.value = repo.fetchStripData(_loadingStripDataResult.value!!.prevStripUrl!!)
+            _fetchingStripDataResult.value = repo.fetchStripData(_fetchingStripDataResult.value!!.prevStripUrl!!)
         }
     }
 
@@ -26,9 +26,9 @@ class ComicBrowserViewModel @Inject constructor(private val repo: ComicBrowserRe
         _stripCountResult.value = repo.getStripCount()
     }
 
-    private val _loadingStripDataResult = MutableLiveData<StripDataModel?>()
-    val loadingStripDataResult: LiveData<StripDataModel?>
-        get() = _loadingStripDataResult
+    private val _fetchingStripDataResult = MutableLiveData<StripDataModel?>()
+    val fetchingStripDataResult: LiveData<StripDataModel?>
+        get() = _fetchingStripDataResult
 
     private val _stripCountResult = MutableLiveData<Int?>()
     val stripCountResult: LiveData<Int?>
