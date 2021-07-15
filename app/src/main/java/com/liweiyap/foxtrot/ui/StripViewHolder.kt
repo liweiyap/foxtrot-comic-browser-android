@@ -2,6 +2,7 @@ package com.liweiyap.foxtrot.ui
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.liweiyap.foxtrot.R
@@ -15,10 +16,13 @@ class StripViewHolder(parent: ViewGroup): RecyclerView.ViewHolder(
 ) {
     private val stripTitle: TextView = itemView.findViewById(R.id.stripTitle)
     private val stripDate: TextView = itemView.findViewById(R.id.stripDate)
+    private val stripImage: ImageView = itemView.findViewById(R.id.stripImage)
 
     fun bind(strip: StripDataModel) {
         stripTitle.text = strip.title
         stripDate.text = formatDate(strip.date)
+        GlideApp.with(itemView).load(strip.imageSrc).defaultOptions().into(stripImage)
+        stripImage.contentDescription = strip.imageAltText
     }
 
     private fun formatDate(date: StripDate): String {
