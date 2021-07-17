@@ -11,8 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_centerInParent="true"
-        tools:ignore="ContentDescription"
-        android:visibility="invisible" />
+        tools:ignore="ContentDescription" />
 
     <com.google.android.material.progressindicator.CircularProgressIndicator
         android:id="@+id/imageLoadProgressIndicator"
@@ -22,14 +21,14 @@
         android:indeterminate="true" />
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/refreshMaterialButton"
+        android:id="@+id/reloadMaterialButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         app:icon="@drawable/ic_baseline_refresh_24"
         app:iconGravity="top"
         app:iconPadding="2dp"
-        android:text="@string/refreshMaterialButton_text"
+        android:text="@string/reloadMaterialButton_text"
         android:textSize="15sp"
         android:visibility="invisible" />
 

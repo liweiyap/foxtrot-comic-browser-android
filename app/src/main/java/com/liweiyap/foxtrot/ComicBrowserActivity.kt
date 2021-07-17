@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.progressindicator.LinearProgressIndicator
 import com.liweiyap.foxtrot.database.StripDataModel
-import com.liweiyap.foxtrot.ui.StripAdapter
+import com.liweiyap.foxtrot.ui.StripFragmentStateAdapter
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -58,10 +58,10 @@ class ComicBrowserActivity : AppCompatActivity() {
 
         mViewModel.database.observe(this, { database ->
             if (mStripPager.adapter == null) {
-                mStripPager.adapter = StripAdapter(database)
+                mStripPager.adapter = StripFragmentStateAdapter(this, database)
             }
 
-            (mStripPager.adapter as StripAdapter).setData(database)
+            (mStripPager.adapter as StripFragmentStateAdapter).setData(database)
 
             DiffUtil.calculateDiff(object : DiffUtil.Callback(){
                 override fun getOldListSize() = mOldDatabase.size

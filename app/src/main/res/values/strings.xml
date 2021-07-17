@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">FoxTrot Comic Browser</string>
-    <string name="refreshMaterialButton_text">Error loading comic.</string>
+
+    <string name="reloadMaterialButton_text">Reload</string>
+
+    <string name="stripDataModel_fragmentParcelable">STRIPDATAMODEL_FRAGMENTPARCELABLE</string>
 </resources>

@@ -16,6 +16,7 @@ object StripGlideExtension {
         return options
             // https://inthecheesefactory.com/blog/get-to-know-glide-recommended-by-google/en
             .format(DecodeFormat.PREFER_ARGB_8888)
-            .diskCacheStrategy(DiskCacheStrategy.ALL)
+            .diskCacheStrategy(DiskCacheStrategy.NONE)
+            .skipMemoryCache(true)
     }
 }
