@@ -6,9 +6,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DiffUtil
-import androidx.viewpager2.widget.ViewPager2
-import com.google.android.material.progressindicator.LinearProgressIndicator
 import com.liweiyap.foxtrot.database.StripDataModel
+import com.liweiyap.foxtrot.databinding.ActivityComicBrowserBinding
 import com.liweiyap.foxtrot.ui.StripFragmentStateAdapter
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -17,22 +16,20 @@ class ComicBrowserActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-
-        mStripFetchProgressIndicator = findViewById(R.id.stripFetchProgressIndicator)
-        mStripPager = findViewById(R.id.stripPager)
+        mViewBinding = ActivityComicBrowserBinding.inflate(layoutInflater)
+        setContentView(mViewBinding.root)
 
         val stripCountObserver = Observer<Int?> { count ->
             // To avoid IllegalStateException: Cannot switch to indeterminate mode while the progress indicator is visible.
             // (see: https://github.com/material-components/material-components-android/issues/1921)
             if (count == null) {
-                mStripFetchProgressIndicator.isVisible = false
-                mStripFetchProgressIndicator.isIndeterminate = true
-                mStripFetchProgressIndicator.isVisible = true
+                mViewBinding.stripFetchProgressIndicator.isVisible = false
+                mViewBinding.stripFetchProgressIndicator.isIndeterminate = true
+                mViewBinding.stripFetchProgressIndicator.isVisible = true
                 return@Observer
             }
 
-            mStripFetchProgressIndicator.isIndeterminate = false
+            mViewBinding.stripFetchProgressIndicator.isIndeterminate = false
         }
 
         mViewModel.stripCountResult.observe(this, stripCountObserver)
@@ -40,7 +37,7 @@ class ComicBrowserActivity : AppCompatActivity() {
 
         val fetchingStripDataObserver = Observer<StripDataModel?> { fetchedStrip ->
             if (fetchedStrip == null) {
-                mStripFetchProgressIndicator.hide()
+                mViewBinding.stripFetchProgressIndicator.hide()
                 return@Observer
             }
 
@@ -48,7 +45,7 @@ class ComicBrowserActivity : AppCompatActivity() {
                 return@Observer
             }
 
-            mStripFetchProgressIndicator.setProgressCompat(
+            mViewBinding.stripFetchProgressIndicator.setProgressCompat(
                 (++mStripsFetched) * 100 / mViewModel.stripCountResult.value!!,
                 true)
         }
@@ -57,11 +54,11 @@ class ComicBrowserActivity : AppCompatActivity() {
         mViewModel.fetchAllStripData()
 
         mViewModel.database.observe(this, { database ->
-            if (mStripPager.adapter == null) {
-                mStripPager.adapter = StripFragmentStateAdapter(this, database)
+            if (mViewBinding.stripPager.adapter == null) {
+                mViewBinding.stripPager.adapter = StripFragmentStateAdapter(this, database)
             }
 
-            (mStripPager.adapter as StripFragmentStateAdapter).setData(database)
+            (mViewBinding.stripPager.adapter as StripFragmentStateAdapter).setData(database)
 
             DiffUtil.calculateDiff(object : DiffUtil.Callback(){
                 override fun getOldListSize() = mOldDatabase.size
@@ -73,16 +70,14 @@ class ComicBrowserActivity : AppCompatActivity() {
 
                 override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int) =
                     areItemsTheSame(oldItemPosition, newItemPosition)
-            }, false).dispatchUpdatesTo(mStripPager.adapter!!)
+            }, false).dispatchUpdatesTo(mViewBinding.stripPager.adapter!!)
 
             mOldDatabase = database
         })
     }
 
+    private lateinit var mViewBinding: ActivityComicBrowserBinding
     private val mViewModel: ComicBrowserViewModel by viewModels()
     private var mStripsFetched: Int = 0
     private var mOldDatabase: List<StripDataModel> = listOf()
-
-    private lateinit var mStripFetchProgressIndicator: LinearProgressIndicator
-    private lateinit var mStripPager: ViewPager2
 }

@@ -4,13 +4,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.fragment.app.Fragment
-import com.google.android.material.button.MaterialButton
-import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.liweiyap.foxtrot.R
 import com.liweiyap.foxtrot.database.StripDataModel
+import com.liweiyap.foxtrot.databinding.ViewgroupStripBinding
 import com.liweiyap.foxtrot.ui.image.GlideApp
 import com.liweiyap.foxtrot.ui.image.StripGlideRequestListener
 import com.liweiyap.foxtrot.ui.image.StripGlideRequestListenerCallback
@@ -37,7 +34,8 @@ class StripFragment: Fragment() {
             ?: throw RuntimeException("StripFragment::onCreateView(): No StripDataModel argument passed in")
 
         setStrip(strip)
-        return inflater.inflate(R.layout.viewgroup_strip, container, false)
+        _mViewBinding = ViewgroupStripBinding.inflate(inflater, container, false)
+        return mViewBinding.root
     }
 
     // find Views only in onViewCreated()
@@ -45,22 +43,21 @@ class StripFragment: Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        mStripTitle = view.findViewById(R.id.stripTitle)
-        mStripDate = view.findViewById(R.id.stripDate)
-        mStripImage = view.findViewById(R.id.stripImage)
-        mImageLoadProgressListener = view.findViewById(R.id.imageLoadProgressIndicator)
-        mReloadMaterialButton = view.findViewById(R.id.reloadMaterialButton)
-
         setTitle(mStrip.title)
         setDate(mStrip.date)
         setImage(mStrip.imageSrc)
         setContentDescription(mStrip.imageAltText)
 
-        mReloadMaterialButton.setOnClickListener {
-            mReloadMaterialButton.visibility = View.INVISIBLE
-            mImageLoadProgressListener.visibility = View.VISIBLE
+        mViewBinding.stripImageViewGroup.reloadMaterialButton.setOnClickListener {
+            mViewBinding.stripImageViewGroup.reloadMaterialButton.visibility = View.INVISIBLE
+            mViewBinding.stripImageViewGroup.imageLoadProgressIndicator.visibility = View.VISIBLE
             setImage(mStrip.imageSrc)
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _mViewBinding = null
     }
 
     private fun setStrip(strip: StripDataModel) {
@@ -68,11 +65,11 @@ class StripFragment: Fragment() {
     }
 
     private fun setTitle(title: String) {
-        mStripTitle.text = title
+        mViewBinding.stripTitle.text = title
     }
 
     private fun setDate(date: StripDate) {
-        mStripDate.text = DateFormatter.formatDate(date)
+        mViewBinding.stripDate.text = DateFormatter.formatDate(date)
     }
 
     private fun setImage(imageSrc: String) {
@@ -81,31 +78,28 @@ class StripFragment: Fragment() {
             .load(imageSrc)
             .defaultOptions()
             .listener(StripGlideRequestListener(mImageOnLoadFailedCallback, mImageOnResourceReadyCallback))
-            .into(mStripImage)
+            .into(mViewBinding.stripImageViewGroup.stripImage)
     }
 
     private fun setContentDescription(imageAltText: String) {
-        mStripImage.contentDescription = imageAltText
+        mViewBinding.stripImageViewGroup.stripImage.contentDescription = imageAltText
     }
 
     private val mImageOnLoadFailedCallback = object : StripGlideRequestListenerCallback {
         override fun run() {
-            mImageLoadProgressListener.visibility = View.INVISIBLE
-            mReloadMaterialButton.visibility = View.VISIBLE
-            mStripImage.setImageDrawable(null)  // https://github.com/bumptech/glide/issues/618
+            mViewBinding.stripImageViewGroup.imageLoadProgressIndicator.visibility = View.INVISIBLE
+            mViewBinding.stripImageViewGroup.reloadMaterialButton.visibility = View.VISIBLE
+            mViewBinding.stripImageViewGroup.stripImage.setImageDrawable(null)  // https://github.com/bumptech/glide/issues/618
         }
     }
 
     private val mImageOnResourceReadyCallback = object : StripGlideRequestListenerCallback {
         override fun run() {
-            mImageLoadProgressListener.visibility = View.INVISIBLE
+            mViewBinding.stripImageViewGroup.imageLoadProgressIndicator.visibility = View.INVISIBLE
         }
     }
 
+    private var _mViewBinding: ViewgroupStripBinding? = null
+    private val mViewBinding get() = _mViewBinding!!
     private lateinit var mStrip: StripDataModel
-    private lateinit var mStripTitle: TextView
-    private lateinit var mStripDate: TextView
-    private lateinit var mStripImage: ImageView
-    private lateinit var mImageLoadProgressListener: CircularProgressIndicator
-    private lateinit var mReloadMaterialButton: MaterialButton
 }
