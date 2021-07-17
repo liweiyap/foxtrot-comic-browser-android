@@ -16,6 +16,15 @@ object StripGlideExtension {
         return options
             // https://inthecheesefactory.com/blog/get-to-know-glide-recommended-by-google/en
             .format(DecodeFormat.PREFER_ARGB_8888)
+            .diskCacheStrategy(DiskCacheStrategy.ALL)
+    }
+
+    @GlideOption
+    @NonNull
+    @JvmStatic fun noCache(options: BaseRequestOptions<*>): BaseRequestOptions<*>? {
+        return options
+            // https://inthecheesefactory.com/blog/get-to-know-glide-recommended-by-google/en
+            .format(DecodeFormat.PREFER_ARGB_8888)
             .diskCacheStrategy(DiskCacheStrategy.NONE)
             .skipMemoryCache(true)
     }

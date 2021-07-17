@@ -75,8 +75,8 @@ class StripFragment: Fragment() {
     private fun setImage(imageSrc: String) {
         GlideApp
             .with(this)
-            .load(imageSrc)
-            .defaultOptions()
+            .load(imageSrc)  // loading by Glide's RequestManager is done asynchronously (https://github.com/bumptech/glide/issues/1209#issuecomment-219548423)
+            .noCache()
             .listener(StripGlideRequestListener(mImageOnLoadFailedCallback, mImageOnResourceReadyCallback))
             .into(mViewBinding.stripImageViewGroup.stripImage)
     }
