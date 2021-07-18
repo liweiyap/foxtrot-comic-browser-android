@@ -16,13 +16,19 @@ import dagger.hilt.android.AndroidEntryPoint
 
 /**
  * Impracticality in using the following (?):
+ *
  * 1. androidx.fragment.ViewModel, because ViewModel's only responsibility is to manage the data for the UI.
  *    It should never access your view hierarchy or hold a reference back to the Activity or the Fragment.
  *    Whilst we certainly don't store references in ViewModel, a potential setImage() function would involve
- *    GlideApp loading a Target image into an (Image)View asynchronously, so I just wanna be safe.
- * 2. Builder design pattern, because we would have to pass _mViewBinding into some BuilderPlan class,
- *    but the lifetime of this variable is tied to the lifetime of the Fragment, since the variable
- *    is destroyed in onDestroyView().
+ *    GlideApp loading a Target image into an (Image)View asynchronously, so I just wanna be safe and guarantee
+ *    no leaks.
+ *
+ * 2. Builder design pattern, because, similarly, it is awkward to pass the Fragment argument as well as the
+ *    logic of the StripGlideRequestListener into the Builder. Moreover, we would also have to pass
+ *    _mViewBinding into some BuilderPlan class, but the lifetime of this variable is tied to the
+ *    lifetime of the Fragment, since the variable is destroyed in onDestroyView().
+ *
+ * Hence, it would be simpler to keep all View-related logic in this class.
  */
 @AndroidEntryPoint
 class StripFragment: Fragment() {
