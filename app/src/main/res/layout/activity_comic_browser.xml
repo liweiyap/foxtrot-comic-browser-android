@@ -20,7 +20,7 @@
             style="@style/Widget.MaterialComponents.Toolbar.Primary" />
 
         <com.google.android.material.progressindicator.LinearProgressIndicator
-            android:id="@+id/loadingProgressIndicator"
+            android:id="@+id/stripFetchProgressIndicator"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:indicatorColor="?attr/colorSecondary" />

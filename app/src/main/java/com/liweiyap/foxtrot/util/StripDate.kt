@@ -1,8 +1,11 @@
 package com.liweiyap.foxtrot.util
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 import java.security.spec.InvalidParameterSpecException
 
-data class StripDate(val day: Int, val month: Int, val year: Int) {
+@Parcelize
+data class StripDate(val day: Int, val month: Int, val year: Int): Parcelable {
 
     init {
         if (!StripDateHelper.isValidDate(this)) {
