@@ -49,11 +49,7 @@ class StripFragment: Fragment() {
         setImage()
         setContentDescription()
 
-        mViewBinding.stripImageViewGroup.reloadMaterialButton.setOnClickListener {
-            mViewBinding.stripImageViewGroup.reloadMaterialButton.visibility = View.INVISIBLE
-            mViewBinding.stripImageViewGroup.imageLoadProgressIndicator.visibility = View.VISIBLE
-            setImage()
-        }
+        setReloadButtonOnClickListener()
     }
 
     override fun onDestroyView() {
@@ -77,7 +73,7 @@ class StripFragment: Fragment() {
         val imageOnLoadFailedCallback = object : StripGlideRequestListenerCallback {
             override fun run() {
                 mViewBinding.stripImageViewGroup.imageLoadProgressIndicator.visibility = View.INVISIBLE
-                mViewBinding.stripImageViewGroup.reloadMaterialButton.visibility = View.VISIBLE
+                mViewBinding.stripImageViewGroup.reloadButton.visibility = View.VISIBLE
                 mViewBinding.stripImageViewGroup.stripImage.setImageDrawable(null)  // https://github.com/bumptech/glide/issues/618
             }
         }
@@ -98,6 +94,17 @@ class StripFragment: Fragment() {
 
     private fun setContentDescription() {
         mViewBinding.stripImageViewGroup.stripImage.contentDescription = mStrip.imageAltText
+    }
+
+    private fun setReloadButtonOnClickListener() {
+        // also, check out:
+        // https://stackoverflow.com/questions/55926038/how-to-handle-onclick-or-ontouch-like-events-in-viewmodel-with-data-binding-in-m
+        // https://developer.android.com/topic/libraries/data-binding/expressions#listener_bindings
+        mViewBinding.stripImageViewGroup.reloadButton.setOnClickListener {
+            mViewBinding.stripImageViewGroup.reloadButton.visibility = View.INVISIBLE
+            mViewBinding.stripImageViewGroup.imageLoadProgressIndicator.visibility = View.VISIBLE
+            setImage()
+        }
     }
 
     private var _mViewBinding: ViewgroupStripBinding? = null
