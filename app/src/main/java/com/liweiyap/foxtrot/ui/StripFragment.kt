@@ -12,18 +12,19 @@ import com.liweiyap.foxtrot.ui.image.GlideApp
 import com.liweiyap.foxtrot.ui.image.StripGlideRequestListener
 import com.liweiyap.foxtrot.ui.image.StripGlideRequestListenerCallback
 import com.liweiyap.foxtrot.util.DateFormatter
-import com.liweiyap.foxtrot.util.StripDate
+import dagger.hilt.android.AndroidEntryPoint
 
 /**
- * When we use RecyclerView.Adapter in lieu of FragmentStateAdapter and RecyclerView.ViewHolder in lieu of Fragment,
- * we might accidentally turn on the visibility of some View like a reload button on a different ViewHolder in a StripGlideRequestListenerCallback.
- * This might be because ViewPager2::offScreenPageLimit is always > 0, so some pages in the ViewPager are loaded in advance,
- * causing the ReloadMaterialButton on the wrong page to also show up.
- *
- * For thoughts about dependency injection, see:
- * http://frogermcs.github.io/inject-everything-viewholder-and-dagger-2-example/
- * https://stackoverflow.com/questions/63697582/how-to-inject-adapter-with-hilt
+ * Impracticality in using the following (?):
+ * 1. androidx.fragment.ViewModel, because ViewModel's only responsibility is to manage the data for the UI.
+ *    It should never access your view hierarchy or hold a reference back to the Activity or the Fragment.
+ *    Whilst we certainly don't store references in ViewModel, a potential setImage() function would involve
+ *    GlideApp loading a Target image into an (Image)View asynchronously, so I just wanna be safe.
+ * 2. Builder design pattern, because we would have to pass _mViewBinding into some BuilderPlan class,
+ *    but the lifetime of this variable is tied to the lifetime of the Fragment, since the variable
+ *    is destroyed in onDestroyView().
  */
+@AndroidEntryPoint
 class StripFragment: Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -43,15 +44,15 @@ class StripFragment: Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setTitle(mStrip.title)
-        setDate(mStrip.date)
-        setImage(mStrip.imageSrc)
-        setContentDescription(mStrip.imageAltText)
+        setTitle()
+        setDate()
+        setImage()
+        setContentDescription()
 
         mViewBinding.stripImageViewGroup.reloadMaterialButton.setOnClickListener {
             mViewBinding.stripImageViewGroup.reloadMaterialButton.visibility = View.INVISIBLE
             mViewBinding.stripImageViewGroup.imageLoadProgressIndicator.visibility = View.VISIBLE
-            setImage(mStrip.imageSrc)
+            setImage()
         }
     }
 
@@ -64,39 +65,39 @@ class StripFragment: Fragment() {
         mStrip = strip
     }
 
-    private fun setTitle(title: String) {
-        mViewBinding.stripTitle.text = title
+    private fun setTitle() {
+        mViewBinding.stripTitle.text = mStrip.title
     }
 
-    private fun setDate(date: StripDate) {
-        mViewBinding.stripDate.text = DateFormatter.formatDate(date)
+    private fun setDate() {
+        mViewBinding.stripDate.text = DateFormatter.formatDate(mStrip.date)
     }
 
-    private fun setImage(imageSrc: String) {
+    private fun setImage() {
+        val imageOnLoadFailedCallback = object : StripGlideRequestListenerCallback {
+            override fun run() {
+                mViewBinding.stripImageViewGroup.imageLoadProgressIndicator.visibility = View.INVISIBLE
+                mViewBinding.stripImageViewGroup.reloadMaterialButton.visibility = View.VISIBLE
+                mViewBinding.stripImageViewGroup.stripImage.setImageDrawable(null)  // https://github.com/bumptech/glide/issues/618
+            }
+        }
+
+        val imageOnResourceReadyCallback = object : StripGlideRequestListenerCallback {
+            override fun run() {
+                mViewBinding.stripImageViewGroup.imageLoadProgressIndicator.visibility = View.INVISIBLE
+            }
+        }
+
         GlideApp
             .with(this)
-            .load(imageSrc)  // loading by Glide's RequestManager is done asynchronously (https://github.com/bumptech/glide/issues/1209#issuecomment-219548423)
+            .load(mStrip.imageSrc)  // loading by Glide's RequestManager is done asynchronously (https://github.com/bumptech/glide/issues/1209#issuecomment-219548423)
             .noCache()
-            .listener(StripGlideRequestListener(mImageOnLoadFailedCallback, mImageOnResourceReadyCallback))
+            .listener(StripGlideRequestListener(imageOnLoadFailedCallback, imageOnResourceReadyCallback))
             .into(mViewBinding.stripImageViewGroup.stripImage)
     }
 
-    private fun setContentDescription(imageAltText: String) {
-        mViewBinding.stripImageViewGroup.stripImage.contentDescription = imageAltText
-    }
-
-    private val mImageOnLoadFailedCallback = object : StripGlideRequestListenerCallback {
-        override fun run() {
-            mViewBinding.stripImageViewGroup.imageLoadProgressIndicator.visibility = View.INVISIBLE
-            mViewBinding.stripImageViewGroup.reloadMaterialButton.visibility = View.VISIBLE
-            mViewBinding.stripImageViewGroup.stripImage.setImageDrawable(null)  // https://github.com/bumptech/glide/issues/618
-        }
-    }
-
-    private val mImageOnResourceReadyCallback = object : StripGlideRequestListenerCallback {
-        override fun run() {
-            mViewBinding.stripImageViewGroup.imageLoadProgressIndicator.visibility = View.INVISIBLE
-        }
+    private fun setContentDescription() {
+        mViewBinding.stripImageViewGroup.stripImage.contentDescription = mStrip.imageAltText
     }
 
     private var _mViewBinding: ViewgroupStripBinding? = null
