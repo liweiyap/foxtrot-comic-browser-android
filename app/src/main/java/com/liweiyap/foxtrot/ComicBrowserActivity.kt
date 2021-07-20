@@ -5,11 +5,15 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DiffUtil
 import com.liweiyap.foxtrot.database.StripDataModel
 import com.liweiyap.foxtrot.databinding.ActivityComicBrowserBinding
 import com.liweiyap.foxtrot.ui.StripFragmentStateAdapter
+import com.liweiyap.foxtrot.ui.image.GlideCacheCleaner
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class ComicBrowserActivity : AppCompatActivity() {
@@ -74,10 +78,23 @@ class ComicBrowserActivity : AppCompatActivity() {
 
             mOldDatabase = database
         })
+
+        mGlideCacheCleaner = GlideCacheCleaner(applicationContext)
+    }
+
+    override fun onDestroy() {
+        clearImageCache()
+        super.onDestroy()
+    }
+
+    private fun clearImageCache() = lifecycleScope.launch {
+        mGlideCacheCleaner.clearAllCache()
     }
 
     private lateinit var mViewBinding: ActivityComicBrowserBinding
     private val mViewModel: ComicBrowserViewModel by viewModels()
     private var mStripsFetched: Int = 0
     private var mOldDatabase: List<StripDataModel> = listOf()
+
+    @Inject lateinit var mGlideCacheCleaner: GlideCacheCleaner
 }

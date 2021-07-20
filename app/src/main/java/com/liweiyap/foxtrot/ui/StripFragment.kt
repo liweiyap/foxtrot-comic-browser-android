@@ -1,16 +1,17 @@
 package com.liweiyap.foxtrot.ui
 
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.github.piasy.biv.BigImageViewer
 import com.liweiyap.foxtrot.R
 import com.liweiyap.foxtrot.database.StripDataModel
 import com.liweiyap.foxtrot.databinding.ViewgroupStripBinding
-import com.liweiyap.foxtrot.ui.image.GlideApp
-import com.liweiyap.foxtrot.ui.image.StripGlideRequestListener
-import com.liweiyap.foxtrot.ui.image.StripGlideRequestListenerCallback
+import com.liweiyap.foxtrot.ui.image.DownloadProgressPieIndicator
+import com.liweiyap.foxtrot.ui.image.StripGlideImageLoader
 import com.liweiyap.foxtrot.util.DateFormatter
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -33,6 +34,11 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class StripFragment: Fragment() {
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        BigImageViewer.initialize(StripGlideImageLoader.with(requireActivity().applicationContext))
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val args: Bundle = arguments
             ?: throw RuntimeException("StripFragment::onCreateView(): No arguments passed in")
@@ -54,8 +60,6 @@ class StripFragment: Fragment() {
         setDate()
         setImage()
         setContentDescription()
-
-        setReloadButtonOnClickListener()
     }
 
     override fun onDestroyView() {
@@ -76,41 +80,12 @@ class StripFragment: Fragment() {
     }
 
     private fun setImage() {
-        val imageOnLoadFailedCallback = object : StripGlideRequestListenerCallback {
-            override fun run() {
-                mViewBinding.stripImageViewGroup.imageLoadProgressIndicator.visibility = View.INVISIBLE
-                mViewBinding.stripImageViewGroup.reloadButton.visibility = View.VISIBLE
-                mViewBinding.stripImageViewGroup.stripImage.setImageDrawable(null)  // https://github.com/bumptech/glide/issues/618
-            }
-        }
-
-        val imageOnResourceReadyCallback = object : StripGlideRequestListenerCallback {
-            override fun run() {
-                mViewBinding.stripImageViewGroup.imageLoadProgressIndicator.visibility = View.INVISIBLE
-            }
-        }
-
-        GlideApp
-            .with(this)
-            .load(mStrip.imageSrc)  // loading by Glide's RequestManager is done asynchronously (https://github.com/bumptech/glide/issues/1209#issuecomment-219548423)
-            .noCache()
-            .listener(StripGlideRequestListener(imageOnLoadFailedCallback, imageOnResourceReadyCallback))
-            .into(mViewBinding.stripImageViewGroup.stripImage)
+        mViewBinding.stripImage.setProgressIndicator(DownloadProgressPieIndicator())
+        mViewBinding.stripImage.showImage(Uri.parse(mStrip.imageSrc))
     }
 
     private fun setContentDescription() {
-        mViewBinding.stripImageViewGroup.stripImage.contentDescription = mStrip.imageAltText
-    }
-
-    private fun setReloadButtonOnClickListener() {
-        // also, check out:
-        // https://stackoverflow.com/questions/55926038/how-to-handle-onclick-or-ontouch-like-events-in-viewmodel-with-data-binding-in-m
-        // https://developer.android.com/topic/libraries/data-binding/expressions#listener_bindings
-        mViewBinding.stripImageViewGroup.reloadButton.setOnClickListener {
-            mViewBinding.stripImageViewGroup.reloadButton.visibility = View.INVISIBLE
-            mViewBinding.stripImageViewGroup.imageLoadProgressIndicator.visibility = View.VISIBLE
-            setImage()
-        }
+        mViewBinding.stripImage.contentDescription = mStrip.imageAltText
     }
 
     private var _mViewBinding: ViewgroupStripBinding? = null
