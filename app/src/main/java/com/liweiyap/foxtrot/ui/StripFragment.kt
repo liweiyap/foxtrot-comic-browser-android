@@ -1,31 +1,43 @@
 package com.liweiyap.foxtrot.ui
 
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.github.piasy.biv.BigImageViewer
 import com.liweiyap.foxtrot.R
 import com.liweiyap.foxtrot.database.StripDataModel
 import com.liweiyap.foxtrot.databinding.ViewgroupStripBinding
-import com.liweiyap.foxtrot.ui.image.GlideApp
-import com.liweiyap.foxtrot.ui.image.StripGlideRequestListener
-import com.liweiyap.foxtrot.ui.image.StripGlideRequestListenerCallback
+import com.liweiyap.foxtrot.ui.image.DownloadProgressPieIndicator
+import com.liweiyap.foxtrot.ui.image.StripGlideImageLoader
 import com.liweiyap.foxtrot.util.DateFormatter
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
  * Impracticality in using the following (?):
+ *
  * 1. androidx.fragment.ViewModel, because ViewModel's only responsibility is to manage the data for the UI.
  *    It should never access your view hierarchy or hold a reference back to the Activity or the Fragment.
  *    Whilst we certainly don't store references in ViewModel, a potential setImage() function would involve
- *    GlideApp loading a Target image into an (Image)View asynchronously, so I just wanna be safe.
- * 2. Builder design pattern, because we would have to pass _mViewBinding into some BuilderPlan class,
- *    but the lifetime of this variable is tied to the lifetime of the Fragment, since the variable
- *    is destroyed in onDestroyView().
+ *    GlideApp loading a Target image into an (Image)View asynchronously, so I just wanna be safe and guarantee
+ *    no leaks.
+ *
+ * 2. Builder design pattern, because, similarly, it is awkward to pass the Fragment argument as well as the
+ *    logic of the StripGlideRequestListener into the Builder. Moreover, we would also have to pass
+ *    _mViewBinding into some BuilderPlan class, but the lifetime of this variable is tied to the
+ *    lifetime of the Fragment, since the variable is destroyed in onDestroyView().
+ *
+ * Hence, it would be simpler to keep all View-related logic in this class.
  */
 @AndroidEntryPoint
 class StripFragment: Fragment() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        BigImageViewer.initialize(StripGlideImageLoader.with(requireActivity().applicationContext))
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val args: Bundle = arguments
@@ -48,8 +60,6 @@ class StripFragment: Fragment() {
         setDate()
         setImage()
         setContentDescription()
-
-        setReloadButtonOnClickListener()
     }
 
     override fun onDestroyView() {
@@ -70,41 +80,12 @@ class StripFragment: Fragment() {
     }
 
     private fun setImage() {
-        val imageOnLoadFailedCallback = object : StripGlideRequestListenerCallback {
-            override fun run() {
-                mViewBinding.stripImageViewGroup.imageLoadProgressIndicator.visibility = View.INVISIBLE
-                mViewBinding.stripImageViewGroup.reloadButton.visibility = View.VISIBLE
-                mViewBinding.stripImageViewGroup.stripImage.setImageDrawable(null)  // https://github.com/bumptech/glide/issues/618
-            }
-        }
-
-        val imageOnResourceReadyCallback = object : StripGlideRequestListenerCallback {
-            override fun run() {
-                mViewBinding.stripImageViewGroup.imageLoadProgressIndicator.visibility = View.INVISIBLE
-            }
-        }
-
-        GlideApp
-            .with(this)
-            .load(mStrip.imageSrc)  // loading by Glide's RequestManager is done asynchronously (https://github.com/bumptech/glide/issues/1209#issuecomment-219548423)
-            .noCache()
-            .listener(StripGlideRequestListener(imageOnLoadFailedCallback, imageOnResourceReadyCallback))
-            .into(mViewBinding.stripImageViewGroup.stripImage)
+        mViewBinding.stripImage.setProgressIndicator(DownloadProgressPieIndicator())
+        mViewBinding.stripImage.showImage(Uri.parse(mStrip.imageSrc))
     }
 
     private fun setContentDescription() {
-        mViewBinding.stripImageViewGroup.stripImage.contentDescription = mStrip.imageAltText
-    }
-
-    private fun setReloadButtonOnClickListener() {
-        // also, check out:
-        // https://stackoverflow.com/questions/55926038/how-to-handle-onclick-or-ontouch-like-events-in-viewmodel-with-data-binding-in-m
-        // https://developer.android.com/topic/libraries/data-binding/expressions#listener_bindings
-        mViewBinding.stripImageViewGroup.reloadButton.setOnClickListener {
-            mViewBinding.stripImageViewGroup.reloadButton.visibility = View.INVISIBLE
-            mViewBinding.stripImageViewGroup.imageLoadProgressIndicator.visibility = View.VISIBLE
-            setImage()
-        }
+        mViewBinding.stripImage.contentDescription = mStrip.imageAltText
     }
 
     private var _mViewBinding: ViewgroupStripBinding? = null
