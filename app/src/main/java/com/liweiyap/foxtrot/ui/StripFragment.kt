@@ -36,10 +36,9 @@ class StripFragment: Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        BigImageViewer.initialize(StripGlideImageLoader.with(requireActivity().applicationContext))
-    }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        BigImageViewer.initialize(StripGlideImageLoader.with(requireActivity().applicationContext))
+
         val args: Bundle = arguments
             ?: throw RuntimeException("StripFragment::onCreateView(): No arguments passed in")
 
@@ -47,6 +46,9 @@ class StripFragment: Fragment() {
             ?: throw RuntimeException("StripFragment::onCreateView(): No StripDataModel argument passed in")
 
         setStrip(strip)
+    }
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _mViewBinding = ViewgroupStripBinding.inflate(inflater, container, false)
         return mViewBinding.root
     }
