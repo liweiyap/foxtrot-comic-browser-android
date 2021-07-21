@@ -13,6 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        app:fontFamily="@font/alex_bold"
         android:gravity="center" />
 
     <TextView
@@ -20,6 +21,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        app:fontFamily="@font/alex_bold"
         android:gravity="center" />
 
     <com.github.piasy.biv.view.BigImageView
