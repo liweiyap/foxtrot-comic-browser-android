@@ -29,6 +29,9 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="5"
+        android:background="@drawable/ft_tile_grayed"
+        android:backgroundTint="@color/watermark"
+        android:backgroundTintMode="src_over"
         app:failureImage="@drawable/ic_baseline_refresh_24"
         tools:ignore="ContentDescription" />
 
