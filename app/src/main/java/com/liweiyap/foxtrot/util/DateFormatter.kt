@@ -4,6 +4,7 @@ import android.icu.text.SimpleDateFormat
 import android.os.Build
 import android.text.format.DateFormat
 import androidx.annotation.RequiresApi
+import java.security.spec.InvalidParameterSpecException
 import java.text.DateFormatSymbols
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -13,7 +14,16 @@ object DateFormatter {
 
     @JvmStatic fun formatDate(date: StripDate): String {
         val dayOfWeek: (StripDate) -> String = { _date: StripDate ->
-            DateFormatSymbols(Locale.ENGLISH).shortWeekdays[_date.getDayOfWeek()]
+            when (_date.getDayOfWeek()) {
+                0 -> "Mon"
+                1 -> "Tue"
+                2 -> "Wed"
+                3 -> "Thu"
+                4 -> "Fri"
+                5 -> "Sat"
+                6 -> "Sun"
+                else -> throw InvalidParameterSpecException()
+            }
         }
 
         // https://stackoverflow.com/questions/1038570/how-can-i-convert-an-integer-to-localized-month-name-in-java
