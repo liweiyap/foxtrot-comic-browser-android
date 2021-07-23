@@ -7,7 +7,7 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 /**
- * clear out Glide’s in memory cache and `BitmapPool`
+ * clear out Glide’s in-memory cache and `BitmapPool`
  * (https://bumptech.github.io/glide/doc/caching.html)
  */
 class GlideCacheCleaner @Inject constructor(@ApplicationContext private val appContext: Context) {
