@@ -3,7 +3,6 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:weightSum="8"
     android:orientation="vertical">
@@ -13,6 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        app:fontFamily="@font/alex_bold"
         android:gravity="center" />
 
     <TextView
@@ -20,6 +20,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        app:fontFamily="@font/alex_bold"
         android:gravity="center" />
 
     <com.github.piasy.biv.view.BigImageView
@@ -27,7 +28,27 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="5"
-        app:failureImage="@drawable/ic_baseline_refresh_24"
-        tools:ignore="ContentDescription" />
+        android:background="@drawable/ft_tile_grayed"
+        android:backgroundTint="@color/watermark"
+        android:backgroundTintMode="src_over"
+        app:failureImage="@drawable/ic_baseline_refresh_24" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <com.like.LikeButton
+            android:id="@+id/favouriteButton"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintHorizontal_weight="1"
+            app:icon_type="heart" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </LinearLayout>

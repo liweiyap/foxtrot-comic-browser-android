@@ -2,21 +2,18 @@ package com.liweiyap.foxtrot
 
 import android.os.Bundle
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DiffUtil
 import com.liweiyap.foxtrot.database.StripDataModel
 import com.liweiyap.foxtrot.databinding.ActivityComicBrowserBinding
 import com.liweiyap.foxtrot.ui.StripFragmentStateAdapter
-import com.liweiyap.foxtrot.ui.image.GlideCacheCleaner
+import com.liweiyap.foxtrot.ui.image.BaseGlideActivity
+import com.liweiyap.foxtrot.util.OnFavouriteChangeListener
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @AndroidEntryPoint
-class ComicBrowserActivity : AppCompatActivity() {
+class ComicBrowserActivity : BaseGlideActivity(), OnFavouriteChangeListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,7 +54,7 @@ class ComicBrowserActivity : AppCompatActivity() {
         mViewModel.fetchingStripDataResult.observe(this, fetchingStripDataObserver)
         mViewModel.fetchAllStripData()
 
-        mViewModel.database.observe(this, { database ->
+        mViewModel.stripDatabase.observe(this, { database ->
             if (mViewBinding.stripPager.adapter == null) {
                 mViewBinding.stripPager.adapter = StripFragmentStateAdapter(this, database)
             }
@@ -69,8 +66,16 @@ class ComicBrowserActivity : AppCompatActivity() {
 
                 override fun getNewListSize() = database.size
 
-                override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int) =
-                    mOldDatabase[oldItemPosition] == database[newItemPosition]
+                override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                    return ((mOldDatabase[oldItemPosition].url == database[newItemPosition].url) &&
+                            (mOldDatabase[oldItemPosition].title == database[newItemPosition].title) &&
+                            (mOldDatabase[oldItemPosition].date == database[newItemPosition].date) &&
+                            (mOldDatabase[oldItemPosition].imageSrc == database[newItemPosition].imageSrc) &&
+                            (mOldDatabase[oldItemPosition].imageAltText == database[newItemPosition].imageAltText) &&
+                            (mOldDatabase[oldItemPosition].tags == database[newItemPosition].tags) &&
+                            (mOldDatabase[oldItemPosition].prevStripUrl == database[newItemPosition].prevStripUrl) &&
+                            (mOldDatabase[oldItemPosition].nextStripUrl == database[newItemPosition].nextStripUrl))
+                }
 
                 override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int) =
                     areItemsTheSame(oldItemPosition, newItemPosition)
@@ -78,23 +83,14 @@ class ComicBrowserActivity : AppCompatActivity() {
 
             mOldDatabase = database
         })
-
-        mGlideCacheCleaner = GlideCacheCleaner(applicationContext)
     }
 
-    override fun onDestroy() {
-        clearImageCache()
-        super.onDestroy()
-    }
-
-    private fun clearImageCache() = lifecycleScope.launch {
-        mGlideCacheCleaner.clearAllCache()
+    override fun toggleIsFavourite(urlString: String) {
+        mViewModel.toggleIsFavourite(urlString)
     }
 
     private lateinit var mViewBinding: ActivityComicBrowserBinding
     private val mViewModel: ComicBrowserViewModel by viewModels()
     private var mStripsFetched: Int = 0
     private var mOldDatabase: List<StripDataModel> = listOf()
-
-    @Inject lateinit var mGlideCacheCleaner: GlideCacheCleaner
 }

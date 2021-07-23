@@ -1,5 +1,6 @@
 package com.liweiyap.foxtrot.ui
 
+import android.content.Context
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,12 +8,16 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.github.piasy.biv.BigImageViewer
+import com.like.LikeButton
+import com.like.OnLikeListener
 import com.liweiyap.foxtrot.R
 import com.liweiyap.foxtrot.database.StripDataModel
 import com.liweiyap.foxtrot.databinding.ViewgroupStripBinding
 import com.liweiyap.foxtrot.ui.image.DownloadProgressPieIndicator
 import com.liweiyap.foxtrot.ui.image.StripGlideImageLoader
+import com.liweiyap.foxtrot.ui.image.StripGlideImageLoaderCallback
 import com.liweiyap.foxtrot.util.DateFormatter
+import com.liweiyap.foxtrot.util.OnFavouriteChangeListener
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
@@ -24,15 +29,19 @@ import dagger.hilt.android.AndroidEntryPoint
  *    GlideApp loading a Target image into an (Image)View asynchronously, so I just wanna be safe and guarantee
  *    no leaks.
  *
- * 2. Builder design pattern, because, similarly, it is awkward to pass the Fragment argument as well as the
- *    logic of the StripGlideRequestListener into the Builder. Moreover, we would also have to pass
- *    _mViewBinding into some BuilderPlan class, but the lifetime of this variable is tied to the
- *    lifetime of the Fragment, since the variable is destroyed in onDestroyView().
+ * 2. Might consider Builder design pattern in future?
  *
  * Hence, it would be simpler to keep all View-related logic in this class.
  */
 @AndroidEntryPoint
 class StripFragment: Fragment() {
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        try {
+            mOnFavouriteChangeListener = context as OnFavouriteChangeListener
+        } catch (castException: java.lang.ClassCastException) {}
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,6 +71,7 @@ class StripFragment: Fragment() {
         setDate()
         setImage()
         setContentDescription()
+        setFavourite()
     }
 
     override fun onDestroyView() {
@@ -83,6 +93,7 @@ class StripFragment: Fragment() {
 
     private fun setImage() {
         mViewBinding.stripImage.setProgressIndicator(DownloadProgressPieIndicator())
+        mViewBinding.stripImage.setImageLoaderCallback(StripGlideImageLoaderCallback(mViewBinding.stripImage))
         mViewBinding.stripImage.showImage(Uri.parse(mStrip.imageSrc))
     }
 
@@ -90,7 +101,28 @@ class StripFragment: Fragment() {
         mViewBinding.stripImage.contentDescription = mStrip.imageAltText
     }
 
+    private fun setFavourite() {
+        val onLikeListener = object: OnLikeListener {
+            override fun liked(likeButton: LikeButton?) {
+                toggleFavourite()
+            }
+
+            override fun unLiked(likeButton: LikeButton?) {
+                toggleFavourite()
+            }
+        }
+
+        mViewBinding.favouriteButton.isLiked = mStrip.isFavourite
+        mViewBinding.favouriteButton.setOnLikeListener(onLikeListener)
+    }
+
+    private fun toggleFavourite() {
+        mStrip.isFavourite = !mStrip.isFavourite
+        mOnFavouriteChangeListener.toggleIsFavourite(mStrip.url)
+    }
+
     private var _mViewBinding: ViewgroupStripBinding? = null
     private val mViewBinding get() = _mViewBinding!!
     private lateinit var mStrip: StripDataModel
+    private lateinit var mOnFavouriteChangeListener: OnFavouriteChangeListener
 }

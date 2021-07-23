@@ -10,8 +10,10 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class ComicBrowserRepository @Inject constructor(private val scraper: WebpageScraper, private val stripDao: StripDao) {
-
+class ComicBrowserRepository @Inject constructor(
+    private val scraper: WebpageScraper,
+    private val stripDao: StripDao
+) {
     suspend fun fetchLatestStripData(): StripDataModel? = withContext(Dispatchers.IO) {
         scrapeLatestStripData()
         return@withContext getLatestStripUrl()?.let {
@@ -33,13 +35,17 @@ class ComicBrowserRepository @Inject constructor(private val scraper: WebpageScr
         }
     }
 
-    fun getDatabase(): Flow<List<StripDataModel>> =
+    fun getAllStrips(): Flow<List<StripDataModel>> =
         stripDao.getAll().distinctUntilChanged()
+
+    suspend fun toggleIsFavourite(urlString: String) = withContext(Dispatchers.IO) {
+        stripDao.toggleIsFavourite(urlString)
+    }
 
     private suspend fun scrapeLatestStripData() = withContext(Dispatchers.IO) {
         val latestStrip: ScraperResult<StripDataModel> = scraper.scrapeLatestStripDataMainSafe()
         if (latestStrip is ScraperResult.Success<StripDataModel>) {
-            stripDao.insert(latestStrip.data)
+            store(latestStrip.data)
         }
     }
 
@@ -50,8 +56,16 @@ class ComicBrowserRepository @Inject constructor(private val scraper: WebpageScr
 
         val strip: ScraperResult<StripDataModel> = scraper.scrapeStripDataMainSafe(urlString)
         if (strip is ScraperResult.Success<StripDataModel>) {
-            stripDao.insert(strip.data)
+            store(strip.data)
         }
+    }
+
+    private suspend fun store(strip: StripDataModel) = withContext(Dispatchers.IO) {
+        val dbStrip: StripDataModel? = stripDao.get(strip.url)
+        if (dbStrip != null) {
+            strip.isFavourite = dbStrip.isFavourite
+        }
+        stripDao.insert(strip)
     }
 
     private fun getLatestStripUrl(): String? =

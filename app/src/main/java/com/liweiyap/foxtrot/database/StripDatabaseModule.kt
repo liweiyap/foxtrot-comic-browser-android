@@ -14,8 +14,10 @@ class StripDatabaseModule {
 
     @Singleton
     @Provides
-    fun provideStripDatabase(@ApplicationContext context: Context) = StripDatabase(context)
+    fun provideAppDatabase(@ApplicationContext context: Context) =
+        StripDatabase(context)
 
     @Provides
-    fun provideStripDao(db: StripDatabase): StripDao = db.getStripDao()
+    fun provideStripDao(db: StripDatabase): StripDao =
+        db.getStripDao()
 }
