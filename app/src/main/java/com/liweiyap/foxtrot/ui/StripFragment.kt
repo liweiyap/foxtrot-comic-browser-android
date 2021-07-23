@@ -118,6 +118,10 @@ class StripFragment: Fragment() {
 
     private fun toggleFavourite() {
         mStrip.isFavourite = !mStrip.isFavourite
+
+        if (!this::mOnFavouriteChangeListener.isInitialized) {
+            return
+        }
         mOnFavouriteChangeListener.toggleIsFavourite(mStrip.url)
     }
 
