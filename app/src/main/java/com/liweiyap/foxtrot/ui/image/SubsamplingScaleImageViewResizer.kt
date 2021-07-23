@@ -2,7 +2,7 @@ package com.liweiyap.foxtrot.ui.image
 
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 
-class SubsamplingScaleImageViewSizer(private val ssiv: SubsamplingScaleImageView): SubsamplingScaleImageView.OnImageEventListener {
+class SubsamplingScaleImageViewResizer(private val ssiv: SubsamplingScaleImageView): SubsamplingScaleImageView.OnImageEventListener {
 
     override fun onReady() {
         ssiv.setDoubleTapZoomDuration(200)

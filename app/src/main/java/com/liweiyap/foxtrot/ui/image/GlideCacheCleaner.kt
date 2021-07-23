@@ -19,13 +19,17 @@ class GlideCacheCleaner @Inject constructor(@ApplicationContext private val appC
 
     private suspend fun clearMemoryCache() {
         withContext(Dispatchers.Main) {
-            GlideApp.get(appContext).clearMemory()
+            GlideApp
+                .get(appContext)
+                .clearMemory()
         }
     }
 
     private suspend fun clearDiskCache() {
         withContext(Dispatchers.IO) {
-            GlideApp.get(appContext).clearDiskCache()
+            GlideApp
+                .get(appContext)
+                .clearDiskCache()
         }
     }
 }

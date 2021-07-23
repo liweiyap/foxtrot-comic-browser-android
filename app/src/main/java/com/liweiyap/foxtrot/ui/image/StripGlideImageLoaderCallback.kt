@@ -11,7 +11,7 @@ class StripGlideImageLoaderCallback(private val biv: BigImageView): ImageLoader.
 
     override fun onSuccess(image: File) {
         val ssiv: SubsamplingScaleImageView = biv.ssiv ?: return
-        ssiv.setOnImageEventListener(SubsamplingScaleImageViewSizer(ssiv))
+        ssiv.setOnImageEventListener(SubsamplingScaleImageViewResizer(ssiv))
     }
 
     override fun onFail(error: Exception) {}
