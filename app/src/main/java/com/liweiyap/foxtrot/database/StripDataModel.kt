@@ -25,4 +25,4 @@ data class StripDataModel(
     val tags: ArrayList<String>,
     @ColumnInfo(name = "prev_strip_url") val prevStripUrl: String?,
     @ColumnInfo(name = "next_strip_url") val nextStripUrl: String?,
-    @ColumnInfo(name = "is_favourite") val isFavourite: Boolean) : Parcelable
+    @ColumnInfo(name = "is_favourite", defaultValue = "0") var isFavourite: Boolean = false) : Parcelable

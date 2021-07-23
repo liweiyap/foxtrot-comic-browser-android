@@ -109,7 +109,7 @@ class WebpageScraper @Inject constructor() {
             }
 
             // store in instance of data class
-            stripData = StripDataModel(urlString, stripTitle, stripDate, stripImageSourceUrl, stripImageAltText, stripTags, prevStripUrl, nextStripUrl, false)
+            stripData = StripDataModel(urlString, stripTitle, stripDate, stripImageSourceUrl, stripImageAltText, stripTags, prevStripUrl, nextStripUrl)
         } catch (e: Exception) {
             return ScraperResult.Error(e)
         }

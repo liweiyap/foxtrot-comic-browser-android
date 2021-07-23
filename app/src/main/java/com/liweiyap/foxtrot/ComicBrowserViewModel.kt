@@ -26,6 +26,10 @@ class ComicBrowserViewModel @Inject constructor(private val repo: ComicBrowserRe
         _stripCountResult.value = repo.getStripCount()
     }
 
+    fun toggleIsFavourite(urlString: String) = viewModelScope.launch {
+        repo.toggleIsFavourite(urlString)
+    }
+
     private val _fetchingStripDataResult = MutableLiveData<StripDataModel?>()
     val fetchingStripDataResult: LiveData<StripDataModel?>
         get() = _fetchingStripDataResult
@@ -34,5 +38,5 @@ class ComicBrowserViewModel @Inject constructor(private val repo: ComicBrowserRe
     val stripCountResult: LiveData<Int?>
         get() = _stripCountResult
 
-    val database: LiveData<List<StripDataModel>> = repo.getDatabase().asLiveData()
+    val stripDatabase: LiveData<List<StripDataModel>> = repo.getAllStrips().asLiveData()
 }

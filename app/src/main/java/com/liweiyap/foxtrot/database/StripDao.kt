@@ -25,6 +25,9 @@ interface StripDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(strip: StripDataModel)
 
+    @Query("UPDATE strips SET is_favourite = NOT is_favourite WHERE url = :urlString")
+    suspend fun toggleIsFavourite(urlString: String)
+
     @Query("SELECT * FROM strips WHERE url = :urlString")
     suspend fun get(urlString: String): StripDataModel?
 
