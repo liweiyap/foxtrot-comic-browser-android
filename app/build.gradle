@@ -70,6 +70,7 @@ dependencies {
     implementation 'com.github.piasy:BigImageViewer:1.8.0'
     implementation 'com.github.piasy:GlideImageLoader:1.8.0'
     implementation 'com.github.filippudak.progresspieview:library:1.0.4'
+    implementation 'com.github.jd-alexander:LikeButton:0.2.3'
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.7'
     kapt "com.google.dagger:hilt-android-compiler:$hilt_version"
     kapt 'androidx.room:room-compiler:2.3.0'
