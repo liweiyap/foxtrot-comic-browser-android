@@ -2,22 +2,18 @@ package com.liweiyap.foxtrot
 
 import android.os.Bundle
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DiffUtil
 import com.liweiyap.foxtrot.database.StripDataModel
 import com.liweiyap.foxtrot.databinding.ActivityComicBrowserBinding
 import com.liweiyap.foxtrot.ui.StripFragmentStateAdapter
-import com.liweiyap.foxtrot.ui.image.GlideCacheCleaner
+import com.liweiyap.foxtrot.ui.image.BaseGlideActivity
 import com.liweiyap.foxtrot.util.OnFavouriteChangeListener
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @AndroidEntryPoint
-class ComicBrowserActivity : AppCompatActivity(), OnFavouriteChangeListener {
+class ComicBrowserActivity : BaseGlideActivity(), OnFavouriteChangeListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -87,17 +83,6 @@ class ComicBrowserActivity : AppCompatActivity(), OnFavouriteChangeListener {
 
             mOldDatabase = database
         })
-
-        mGlideCacheCleaner = GlideCacheCleaner(applicationContext)
-    }
-
-    override fun onDestroy() {
-        clearImageCache()
-        super.onDestroy()
-    }
-
-    private fun clearImageCache() = lifecycleScope.launch {
-        mGlideCacheCleaner.clearAllCache()
     }
 
     override fun toggleIsFavourite(urlString: String) {
@@ -108,6 +93,4 @@ class ComicBrowserActivity : AppCompatActivity(), OnFavouriteChangeListener {
     private val mViewModel: ComicBrowserViewModel by viewModels()
     private var mStripsFetched: Int = 0
     private var mOldDatabase: List<StripDataModel> = listOf()
-
-    @Inject lateinit var mGlideCacheCleaner: GlideCacheCleaner
 }
