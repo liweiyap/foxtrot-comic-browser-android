@@ -16,7 +16,7 @@
             android:id="@+id/topAppBar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:title="FoxTrot"
+            app:title="@string/app_title"
             style="@style/Widget.MaterialComponents.Toolbar.Primary" />
 
         <com.google.android.material.progressindicator.LinearProgressIndicator
