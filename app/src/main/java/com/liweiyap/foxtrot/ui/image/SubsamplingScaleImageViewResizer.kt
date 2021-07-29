@@ -2,6 +2,18 @@ package com.liweiyap.foxtrot.ui.image
 
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 
+/**
+ * required to scale the image properly in cases where `DisplayMetrics` report incorrect xdpi and ydpi,
+ * e.g. in Pixel XL emulator. See the following GitHub issues:
+ * - https://github.com/davemorrissey/subsampling-scale-image-view/issues/505
+ * - https://github.com/davemorrissey/subsampling-scale-image-view/issues/536
+ *
+ * note that the following does not help:
+ * ```
+ * biv.setInitScaleType(BigImageView.INIT_SCALE_TYPE_CUSTOM)
+ * biv.ssiv?.setOnImageEventListener(DisplayOptimizeListener(biv.ssiv!!))
+ * ```
+ */
 class SubsamplingScaleImageViewResizer(private val ssiv: SubsamplingScaleImageView): SubsamplingScaleImageView.OnImageEventListener {
 
     override fun onReady() {
