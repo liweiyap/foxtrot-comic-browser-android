@@ -1,6 +1,7 @@
 package com.liweiyap.foxtrot
 
 import android.os.Bundle
+import android.widget.ImageButton
 import androidx.activity.viewModels
 import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
@@ -84,14 +85,16 @@ class ComicBrowserActivity : BaseGlideActivity(), OnFavouriteChangeListener {
             mOldDatabase = database
         })
 
-        mViewBinding.topAppBar.setOnMenuItemClickListener { menuItem ->
-            when (menuItem.itemId) {
-                R.id.action_prev_strip -> {
-                    // no need for out-of-range check because already handled by pager
-                    mViewBinding.stripPager.currentItem -= 1
-                    true
-                }
-                else -> false
+        mViewBinding.topAppBar.menu.findItem(R.id.action_prev_strip).actionView = ImageButton(this).apply {
+            background = null
+            setImageResource(R.drawable.ic_round_keyboard_arrow_left_24)
+            setOnClickListener {
+                // no need for out-of-range check because already handled by pager
+                mViewBinding.stripPager.currentItem -= 1
+            }
+            setOnLongClickListener {
+                mViewBinding.stripPager.currentItem = 0
+                return@setOnLongClickListener true
             }
         }
     }
