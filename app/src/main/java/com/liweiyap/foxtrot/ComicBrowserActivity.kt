@@ -93,7 +93,7 @@ class ComicBrowserActivity : BaseGlideActivity(), OnFavouriteChangeListener {
                 mViewBinding.stripPager.currentItem -= 1
             }
             setOnLongClickListener {
-                mViewBinding.stripPager.currentItem = 0
+                mViewBinding.stripPager.setCurrentItem(0, false)
                 return@setOnLongClickListener true
             }
         }
@@ -109,7 +109,7 @@ class ComicBrowserActivity : BaseGlideActivity(), OnFavouriteChangeListener {
                 if (mViewBinding.stripPager.adapter == null) {
                     return@setOnLongClickListener true
                 }
-                mViewBinding.stripPager.currentItem = mViewBinding.stripPager.adapter!!.itemCount
+                mViewBinding.stripPager.setCurrentItem(mViewBinding.stripPager.adapter!!.itemCount - 1, false)
                 return@setOnLongClickListener true
             }
         }
