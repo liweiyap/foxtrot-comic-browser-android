@@ -3,8 +3,21 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/more"
-        android:title="Shit"
-        app:showAsAction="never" />
+        android:id="@+id/action_next_strip"
+        android:icon="@drawable/ic_round_keyboard_arrow_left_24"
+        android:title="@string/menu_next_strip"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_prev_strip"
+        android:icon="@drawable/ic_round_keyboard_arrow_right_24"
+        android:title="@string/menu_prev_strip"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_rand_strip"
+        android:icon="@drawable/ic_round_shuffle_24"
+        android:title="@string/menu_rand_strip"
+        app:showAsAction="ifRoom" />
 
 </menu>

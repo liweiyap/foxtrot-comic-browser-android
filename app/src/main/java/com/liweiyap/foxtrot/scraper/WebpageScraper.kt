@@ -2,6 +2,7 @@ package com.liweiyap.foxtrot.scraper
 
 import com.liweiyap.foxtrot.database.StripDataModel
 import com.liweiyap.foxtrot.util.DateFormatter
+import com.liweiyap.foxtrot.util.StringParser
 import com.liweiyap.foxtrot.util.StripDate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -22,7 +23,7 @@ class WebpageScraper @Inject constructor() {
 
     suspend fun scrapeStripDataMainSafe(urlString: String): ScraperResult<StripDataModel> {
         return withContext(Dispatchers.IO) {
-            scrapeStripData(urlString)
+            scrapeStripData(StringParser.secureWebProtocol(urlString))
         }
     }
 
@@ -43,7 +44,7 @@ class WebpageScraper @Inject constructor() {
             }
             val latestStripElement: Element = homePageStripElements.first()
             val latestStripEntry: Elements = latestStripElement.getElementsByTag("a")
-            mLatestStripUrlString = latestStripEntry.attr("href")  // if attr does not exist, `.attr()` returns an empty String
+            mLatestStripUrlString = StringParser.secureWebProtocol(latestStripEntry.attr("href"))  // if attr does not exist, `.attr()` returns an empty String
             val latestStripLinkScrapeResult = scrapeStripData(mLatestStripUrlString)
             if (latestStripLinkScrapeResult is ScraperResult.Success<StripDataModel>) {
                 strip = latestStripLinkScrapeResult.component1()
@@ -75,7 +76,7 @@ class WebpageScraper @Inject constructor() {
 
             // image source URL
             val stripImageMetadata: Elements = stripEntry.select(".entry-content").first().getElementsByTag("img")
-            val stripImageSourceUrl: String = stripImageMetadata.attr("src")
+            val stripImageSourceUrl: String = StringParser.secureWebProtocol(stripImageMetadata.attr("src"))
 
             // image alt text
             val stripImageAltText: String = stripImageMetadata.attr("alt")
@@ -94,7 +95,7 @@ class WebpageScraper @Inject constructor() {
             val prevStripEntries: Elements = adjacentStripEntries.select("[rel=\"prev\"]")
             val prevStripUrl: String? = if (prevStripEntries.size >= 1) {
                 val prevStripEntry: Elements = prevStripEntries.first().getElementsByTag("a")
-                prevStripEntry.attr("href")
+                StringParser.secureWebProtocol(prevStripEntry.attr("href"))
             } else {
                 null
             }
@@ -103,7 +104,7 @@ class WebpageScraper @Inject constructor() {
             val nextStripEntries: Elements = adjacentStripEntries.select("[rel=\"next\"]")
             val nextStripUrl: String? = if (nextStripEntries.size >= 1) {
                 val nextStripEntry: Elements = nextStripEntries.first().getElementsByTag("a")
-                nextStripEntry.attr("href")
+                StringParser.secureWebProtocol(nextStripEntry.attr("href"))
             } else {
                 null
             }
@@ -128,7 +129,7 @@ class WebpageScraper @Inject constructor() {
             val lastPageNumber: Element = pageNumbers[pageNumbers.size - 2]
             val numberOfPages: Int = Integer.valueOf(lastPageNumber.text())
             val lastPageAttr: Elements = lastPageNumber.getElementsByTag("a")
-            val lastPageUrl: String = lastPageAttr.attr("href")
+            val lastPageUrl: String = StringParser.secureWebProtocol(lastPageAttr.attr("href"))
             val lastPage: Document = Jsoup.connect(lastPageUrl).timeout(mConnectionTimeoutInMilliSecs).get()
             val lastPageStripElements: Elements = lastPage.getElementsByTag("article")
             numberOfStrips = (numberOfPages - 1) * stripsPerPage + lastPageStripElements.size

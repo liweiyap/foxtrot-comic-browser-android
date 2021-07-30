@@ -1,6 +1,7 @@
 package com.liweiyap.foxtrot
 
 import android.os.Bundle
+import android.widget.ImageButton
 import androidx.activity.viewModels
 import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
@@ -10,6 +11,7 @@ import com.liweiyap.foxtrot.databinding.ActivityComicBrowserBinding
 import com.liweiyap.foxtrot.ui.StripFragmentStateAdapter
 import com.liweiyap.foxtrot.ui.image.BaseGlideActivity
 import com.liweiyap.foxtrot.util.OnFavouriteChangeListener
+import com.liweiyap.foxtrot.util.RandomNumberGenerator
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -83,6 +85,48 @@ class ComicBrowserActivity : BaseGlideActivity(), OnFavouriteChangeListener {
 
             mOldDatabase = database
         })
+
+        mViewBinding.topAppBar.setOnMenuItemClickListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.action_rand_strip -> {
+                    if (mViewBinding.stripPager.adapter == null) {
+                        return@setOnMenuItemClickListener true
+                    }
+                    mViewBinding.stripPager.setCurrentItem(RandomNumberGenerator.get(mViewBinding.stripPager.adapter!!.itemCount - 1), false)
+                    true
+                }
+                else -> false
+            }
+        }
+
+        mViewBinding.topAppBar.menu.findItem(R.id.action_next_strip).actionView = ImageButton(this).apply {
+            background = null
+            setImageResource(R.drawable.ic_round_keyboard_arrow_left_24)
+            setOnClickListener {
+                // no need for out-of-range check because already handled by pager
+                mViewBinding.stripPager.setCurrentItem(mViewBinding.stripPager.currentItem - 1, false)
+            }
+            setOnLongClickListener {
+                mViewBinding.stripPager.setCurrentItem(0, false)
+                return@setOnLongClickListener true
+            }
+        }
+
+        mViewBinding.topAppBar.menu.findItem(R.id.action_prev_strip).actionView = ImageButton(this).apply {
+            background = null
+            setImageResource(R.drawable.ic_round_keyboard_arrow_right_24)
+            setOnClickListener {
+                // no need for out-of-range check because already handled by pager
+                mViewBinding.stripPager.setCurrentItem(mViewBinding.stripPager.currentItem + 1, false)
+            }
+            setOnLongClickListener {
+                if (mViewBinding.stripPager.adapter == null) {
+                    return@setOnLongClickListener true
+                }
+                mViewBinding.stripPager.setCurrentItem(mViewBinding.stripPager.adapter!!.itemCount - 1, false)
+                return@setOnLongClickListener true
+            }
+        }
     }
 
     override fun toggleIsFavourite(urlString: String) {
