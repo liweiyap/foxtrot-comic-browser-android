@@ -85,7 +85,7 @@ class ComicBrowserActivity : BaseGlideActivity(), OnFavouriteChangeListener {
             mOldDatabase = database
         })
 
-        mViewBinding.topAppBar.menu.findItem(R.id.action_prev_strip).actionView = ImageButton(this).apply {
+        mViewBinding.topAppBar.menu.findItem(R.id.action_next_strip).actionView = ImageButton(this).apply {
             background = null
             setImageResource(R.drawable.ic_round_keyboard_arrow_left_24)
             setOnClickListener {
@@ -94,6 +94,22 @@ class ComicBrowserActivity : BaseGlideActivity(), OnFavouriteChangeListener {
             }
             setOnLongClickListener {
                 mViewBinding.stripPager.currentItem = 0
+                return@setOnLongClickListener true
+            }
+        }
+
+        mViewBinding.topAppBar.menu.findItem(R.id.action_prev_strip).actionView = ImageButton(this).apply {
+            background = null
+            setImageResource(R.drawable.ic_round_keyboard_arrow_right_24)
+            setOnClickListener {
+                // no need for out-of-range check because already handled by pager
+                mViewBinding.stripPager.currentItem += 1
+            }
+            setOnLongClickListener {
+                if (mViewBinding.stripPager.adapter == null) {
+                    return@setOnLongClickListener true
+                }
+                mViewBinding.stripPager.currentItem = mViewBinding.stripPager.adapter!!.itemCount
                 return@setOnLongClickListener true
             }
         }
