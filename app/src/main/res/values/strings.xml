@@ -2,5 +2,7 @@
     <string name="app_name">FoxTrot Comic Browser</string>
     <string name="app_title">FoxTrot</string>
 
+    <string name="menu_prev_strip">Previous Strip</string>
+
     <string name="stripDataModel_fragmentParcelable">STRIPDATAMODEL_FRAGMENTPARCELABLE</string>
 </resources>

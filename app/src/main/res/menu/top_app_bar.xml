@@ -3,8 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/more"
-        android:title="Shit"
-        app:showAsAction="never" />
+        android:id="@+id/action_prev_strip"
+        android:icon="@drawable/ic_round_keyboard_arrow_left_24"
+        android:title="@string/menu_prev_strip"
+        app:showAsAction="always" />
 
 </menu>

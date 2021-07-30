@@ -83,6 +83,17 @@ class ComicBrowserActivity : BaseGlideActivity(), OnFavouriteChangeListener {
 
             mOldDatabase = database
         })
+
+        mViewBinding.topAppBar.setOnMenuItemClickListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.action_prev_strip -> {
+                    // no need for out-of-range check because already handled by pager
+                    mViewBinding.stripPager.currentItem -= 1
+                    true
+                }
+                else -> false
+            }
+        }
     }
 
     override fun toggleIsFavourite(urlString: String) {
