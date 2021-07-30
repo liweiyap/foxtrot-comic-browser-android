@@ -4,6 +4,7 @@
 
     <string name="menu_next_strip">Next Strip</string>
     <string name="menu_prev_strip">Previous Strip</string>
+    <string name="menu_rand_strip">Random Strip</string>
 
     <string name="stripDataModel_fragmentParcelable">STRIPDATAMODEL_FRAGMENTPARCELABLE</string>
 </resources>
