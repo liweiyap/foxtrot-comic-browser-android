@@ -67,7 +67,7 @@ class WebpageScraper @Inject constructor() {
 
             // title
             val stripEntry: Elements = stripPage.getElementsByClass("entry")
-            val stripTitle: String = stripEntry.select(".entry-newtitle").text()
+            val stripTitle: String = StringParser.standardiseUnicodeApostrophe(stripEntry.select(".entry-newtitle").text())
 
             // date
             val stripDateRaw: String = stripEntry.select(".entry-summary").text()
@@ -79,7 +79,7 @@ class WebpageScraper @Inject constructor() {
             val stripImageSourceUrl: String = StringParser.secureWebProtocol(stripImageMetadata.attr("src"))
 
             // image alt text
-            val stripImageAltText: String = stripImageMetadata.attr("alt")
+            val stripImageAltText: String = StringParser.standardiseUnicodeApostrophe(stripImageMetadata.attr("alt"))
 
             // tags
             val stripTagsRaw: Elements = stripEntry.select(".entry-tags")
