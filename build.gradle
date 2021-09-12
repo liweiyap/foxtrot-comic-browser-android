@@ -8,7 +8,7 @@ buildscript {
         maven { url "https://www.jitpack.io" }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.0.0'
+        classpath 'com.android.tools.build:gradle:7.0.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"  // 1.5.21 fixes build issue with @HiltAndroidApp (https://stackoverflow.com/a/68371662/12367873)
         classpath "com.google.dagger:hilt-android-gradle-plugin:$hilt_version"
 

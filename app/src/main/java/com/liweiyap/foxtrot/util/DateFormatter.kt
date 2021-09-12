@@ -44,7 +44,7 @@ object DateFormatter {
     @RequiresApi(Build.VERSION_CODES.O)
     @JvmStatic fun formatDateSinceApi26(rawDate: String): StripDate? {
         return try {
-            val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern(DATE_PATTERN)
+            val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern(DATE_PATTERN, Locale.ENGLISH)
             val date: LocalDate = LocalDate.parse(rawDate, formatter)
             StripDate(date.dayOfMonth, date.monthValue, date.year)
         } catch (e: Exception) {
